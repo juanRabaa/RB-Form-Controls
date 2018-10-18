@@ -1,0 +1,215 @@
+.rb-wp-control .control-title {
+    font-size: 1rem;
+    font-weight: bold;
+    display: inline-block;
+}
+
+.rb-wp-control .control-description {
+    margin:  0;
+    /* margin-bottom: 0.5rem; */
+}
+
+.rb-wp-control {
+    margin-bottom: 1rem;
+    display: block;
+    width: 100%;
+    min-height: 1rem;
+}
+
+.rb-wp-control .control-header {
+    margin-bottom: 0.5rem;
+    line-height: 1;
+}
+
+/* ========================================================================== */
+/* REPEATER */
+/* ========================================================================== */
+.repeater-add-button {
+    text-align: center;
+    font-size: 2.7rem;
+}
+
+.repeater-add-button i:hover {
+    color: #40d600;
+}
+
+.repeater-add-button i {
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.rb-form-control-repeater .rb-form-control-field-group, .rb-form-control-repeater .rb-form-control {
+    border: solid 0.1px grey;
+    margin-bottom: 1rem;
+    background-color: #ffffff;
+}
+
+.rb-form-control-repeater .rb-form-control-field-group > .control-content {
+    padding: 1rem;
+}
+
+.rb-form-control .collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    transition: all 0.3s;
+}
+
+.rb-form-control .collapsible-header .title {
+    padding: 0;
+}
+
+.controls[data-rb-accordion] > .rb-collapsible {
+    margin-bottom: 0;
+}
+
+.controls[data-rb-accordion] > .rb-collapsible:not(:last-child):not(.ui-sortable-helper) {
+    border-bottom-width: 0;
+}
+
+.rb-form-control-repeater .rb-form-control-field-group > .collapsible-body {
+    border-top: solid 0.1px rgb(186, 186, 186);
+}
+
+.rb-collapsible.active >  .collapsible-header {
+    background-color: #d9b25f;
+    color: #ffffff;
+}
+
+.rb-collapsible.active > .collapsible-header .title {
+    color: #ffffff;
+}
+
+.rb-form-control-repeater .rb-form-control-single-field {
+    padding: 0.5rem;
+}
+
+.rb-form-control-repeater .rb-repeater-empty-message {
+    display: none;
+}
+
+.rb-form-control-repeater .rb-form-control.ui-sortable-placeholder {
+    visibility: visible!important;
+    border: dashed 0.1px #808080 !important;
+    min-height: 3.9rem;
+    background-color: transparent;
+}
+/* ========================================================================== */
+/* ACTION CONTROLS */
+/* ========================================================================== */
+.action-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-size: 1.7rem;
+    position: relative;
+    min-height: 3rem;
+    margin-left: 1rem;
+    top: -0.5rem;
+    margin-bottom: -1.0rem;
+    margin-right: -0.5rem;
+}
+
+.action-controls .delete-button {
+    transition: all 0.2s;
+    cursor: pointer;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 0.5rem;
+    box-sizing: border-box;
+    background: #d95f5f;
+    color: #ffffff;
+    border-top: solid 0.1px #be5656;
+}
+
+.action-controls .delete-button:hover {
+    color: white;
+    background: red;
+}
+
+.rb-form-control-field-group > .control-content, .rb-form-control-single-field > .control-content{
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.rb-form-control-field-group > .control-content > .controls, .rb-form-control-single-field > .control-content > .rb-wp-control {
+    flex-grow: 1;
+}
+
+.collapsible-header .action-controls {
+    top: -0.5rem;
+    min-height: 3rem;
+}
+
+/* ========================================================================== */
+/* MEDIA CONTROL */
+/* ========================================================================== */
+.input-wp-media-image-holder .input-image-src {
+    position:  relative;
+    max-height: 10rem;
+    opacity: 1;
+    max-width: 100%;
+}
+
+.input-wp-media-image-holder {
+    position:  relative;
+    border: dashed 0.1rem #555d66;
+    min-height: 6rem;
+    cursor:  pointer;
+    display:  flex;
+    align-items:  center;
+    justify-content:  center;
+    background-color: #d2d2d2;
+}
+
+.input-wp-media-image-holder .input-image-placeholder {
+    position:  absolute;
+    display:  flex;
+    align-items: center;
+    justify-content:  center;
+    height:  100%;
+    width:  100%;
+    top: 0;
+    left:  0;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: -1;
+}
+
+.input-wp-media-image-holder .input-image-placeholder p {
+    font-size: 2rem;
+    margin: 0;
+}
+
+.input-wp-media-image-holder:hover .input-image-src {
+    opacity: 0.2;
+}
+
+.input-wp-media-image-holder:hover .input-image-placeholder, .input-wp-media-image-holder .input-image-src[src=""] ~ .input-image-placeholder {
+    z-index: 2;
+    opacity: 1;
+}
+
+.input-wp-media-image-holder input {
+    position:  absolute;
+    top: 0;
+    z-index:  -1;
+    opacity: 0;
+}
+
+.remove-image-button {
+    text-align: center;
+    font-size: 3rem;
+}
+
+.remove-image-button i:hover {
+    color:  red;
+}
+
+.remove-image-button i {
+    transition:  all 0.3s;
+    cursor:  pointer;
+}

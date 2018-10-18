@@ -1,0 +1,28 @@
+.rb-collapsible .collapsible-header .button {
+    display: flex;
+    align-items:  center;
+    justify-content:  center;
+    font-size: 3rem;
+}
+
+.rb-collapsible .collapsible-header {
+    cursor:  pointer;
+}
+
+.rb-collapsible .collapsible-body {
+    display: none;
+    padding-top:  1rem;
+    overflow: auto;
+}
+
+.rb-collapsible.active .collapsible-body {
+    display: block;
+}
+
+.rb-collapsible.active .collapsible-header .button > i, .rb-collapsible.opening .collapsible-header .button > i {
+    transform: rotate(-90deg);
+}
+
+.rb-collapsible .collapsible-header .button > i {
+    transition:  all 0.3s;
+}
