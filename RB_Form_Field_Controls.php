@@ -30,18 +30,27 @@ abstract class RB_Metabox_Control{
 
     //Prints the control descriptions.
     public function print_control_header(){
-        $label = $this->settings['label'];
+        ?>
+        <div class="control-header">
+            <?php $this->print_label(); ?>
+            <?php $this->print_description(); ?>
+        </div>
+        <?php
+    }
+
+    public function print_description(){
         $description = $this->settings['description'];
-        if( $label || $description ):?>
-            <div class="control-header">
-                <?php if( $label ): ?>
-                <label class="control-title" for="<?php echo $this->settings['id']; ?>"><?php echo $label; ?></label>
-                <?php endif; ?>
-                <?php if($description): ?>
-                <p class="control-description"><?php echo $this->settings['description']; ?></p>
-                <?php endif; ?>
-            </div>
-        <?php endif;
+        if($description):
+        ?> <p class="control-description"><?php echo $description; ?></p> <?php
+        endif;
+    }
+
+    public function print_label( $for = '' ){
+        $for = $for ? $for : $this->settings['id'];
+        $label = $this->settings['label'];
+        if($label):
+        ?> <label class="control-title" for="<?php echo $for; ?>"><?php echo $label; ?></label> <?php
+        endif;
     }
 }
 
@@ -80,9 +89,9 @@ class RB_Input_Control extends RB_Metabox_Control{
         $this->option_none = $option_none;
 
         if( $input_type ):
-            if( $label ): ?>
-            <?php $this->print_control_header(); ?>
-            <?php endif;?>
+            if( $label && $this->input_type != 'checkbox' )
+                $this->print_control_header();
+            ?>
             <div class="rb-inputs-control">
                 <?php $this->render_the_input(); ?>
             </div>
@@ -107,6 +116,7 @@ class RB_Input_Control extends RB_Metabox_Control{
             case 'checkbox': $this->input_render = array($this, 'render_checkbox_input'); break;
             case 'number': $this->input_render = array($this, 'render_number_input'); break;
             case 'select': $this->input_render = array($this, 'render_select_input'); break;
+            case 'datetime-local': $this->input_render = array($this, 'render_datetime_input'); break;
             default: $this->input_render = false; break;
         }
     }
@@ -121,14 +131,23 @@ class RB_Input_Control extends RB_Metabox_Control{
 
     public function render_checkbox_input(){
         $checked_attr = $this->value ? 'checked' : '';
-        ?><input type="checkbox" rb-control-value name="<?php echo $this->id; ?>" value="<?php echo $this->value; ?>" <?php echo $checked_attr; ?>></input><?php
+        ?>
+        <label>
+           <input type="checkbox" rb-control-value name="<?php echo $this->id; ?>" value="<?php echo $this->value; ?>" <?php echo $checked_attr; ?>></input>
+           <span><?php echo $this->settings['label']; ?></span>
+        </label>
+        <?php
+    }
+
+    public function render_datetime_input(){
+        ?><input type="datetime-local" rb-control-value name="<?php echo $this->id; ?>" value="<?php echo $this->value; ?>"></input><?php
     }
 
     public function render_select_input(){
         //$choices = array( $value => $title, ...)
         //$option_none = array($value, $title)
         if( is_array($this->choices) && !empty($this->choices) ): ?>
-        <select rb-control-value name="<?php echo $this->id; ?>">
+        <select class="browser-default" rb-control-value name="<?php echo $this->id; ?>">
             <?php if( is_array($this->option_none) && !empty($this->option_none) ): ?>
                 <option value="<?php echo $this->option_none[0]; ?>"><?php echo $this->option_none[1]; ?></option>
             <?php else: ?>
@@ -210,6 +229,22 @@ class RB_doublelist_control extends RB_Metabox_Control{
 }
 
 class RB_Images_Gallery_Control extends RB_Metabox_Control{
+    
+    public function wp_get_attachment($attachment_id){
+        $attachment = get_post( $attachment_id );
+		return array(
+			'id'	=> $attachment_id,
+			'thumbnail' => wp_get_attachment_thumb_url( $attachment_id ),
+			'title' => $attachment->post_title,
+			'caption' => $attachment->post_excerpt,
+			'description' => $attachment->post_content,
+			'link' => get_permalink( $attachment->ID ),
+			'url' => $attachment->guid,
+			'type' => get_post_mime_type( $attachment_id ),
+			'alt' => get_post_meta( $attachment->ID, '_wp_attachment_image_alt', true ),
+			'video_url'	=> get_post_meta( $attachment->ID, 'rb_media_video_url', true ),
+		);
+    }
 
     public function render_content(){
         $attachments_ids_csv = $this->value;
@@ -223,7 +258,7 @@ class RB_Images_Gallery_Control extends RB_Metabox_Control{
                 <?php
                 if ($attachments_ids):
                     foreach($attachments_ids as $attachment_id ):
-                        $attachment = wp_get_attachment( $attachment_id );
+                        $attachment = $this->wp_get_attachment( $attachment_id );
                 ?>
                 <div class="rb-tax-image rb-gallery-box" rel="<?php echo $attachment_id; ?>" style="background-image: url(<?php echo $attachment['thumbnail']; ?>);">
                     <i class="fas fa-times rb-remove"></i>

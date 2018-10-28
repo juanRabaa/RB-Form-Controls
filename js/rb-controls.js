@@ -9,6 +9,10 @@
             value = $input.is(':checked');
         else
             value = $input.val();
+
+        if( $input.attr('rb-json') )
+            value = JSON.parse(value);
+
         return value;
     }
 
@@ -212,9 +216,11 @@
             $inputs.each(function(){
                 var key = $(this).attr('name').replace(groupID + '-','');
                 finalValue[key] = getInputValue($(this));
+                console.log(key, finalValue[key]);
             });
 
-            //console.log(finalValue);
+            console.log(JSON.stringify(finalValue));
+
             return JSON.stringify(finalValue);
         },
         getValueInput: function($panel){
@@ -267,6 +273,7 @@
         // =============================================================================
         $(document).on('input change', '.rb-form-control-field-group [rb-control-value]', function(){
             $panel = $(this).closest('.rb-form-control-field-group');
+            console.log($(this));
             if($panel.length != 0){
                 groupType.updateValue($panel);
             }

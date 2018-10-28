@@ -130,6 +130,10 @@
     background: red;
 }
 
+.action-controls .delete-button i {
+    margin: 0;
+}
+
 .rb-form-control-field-group > .control-content, .rb-form-control-single-field > .control-content{
     display: flex;
     flex-direction: row-reverse;

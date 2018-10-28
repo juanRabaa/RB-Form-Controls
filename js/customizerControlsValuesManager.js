@@ -1,6 +1,5 @@
 $(document).ready(function(){
-    console.log('Estoy re loco');
-
+    
     $(document).on('input change', '[rb-control-value]', function(){
         $panel = $(this).closest('.rb-customizer-control');
         if($panel.length != 0){

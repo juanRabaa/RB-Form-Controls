@@ -69,6 +69,7 @@ class RB_Metabox extends RB_Form_Field_Controller{
         }
         //If a group of inputs controls were used
         else if( $this->is_group() ){
+            print_r( "Group json: " . $_POST[$this->id]); echo "<br>";
             $new_meta_value = array();
             if( isset($_POST[$this->id]) )
                 $new_meta_value = json_decode($_POST[$this->id], true);
@@ -76,7 +77,7 @@ class RB_Metabox extends RB_Form_Field_Controller{
         //If a single input control was used
         else{
             /* Get the posted data */
-            $new_meta_value = ( isset( $_POST[$this->id] ) ?  $_POST[$this->id] : ’ );
+            $new_meta_value = ( isset( $_POST[$this->id] ) ?  $_POST[$this->id] : '' );
         }
         /* Get the meta key. */
         $meta_key = $this->meta_id;
@@ -84,17 +85,18 @@ class RB_Metabox extends RB_Form_Field_Controller{
         /* Get the meta value of the custom field key. */
         $meta_value = get_post_meta( $post_id, $meta_key, true );
 
-        if( $this->id == '_TEST__testtest____' ){
-            print_r($_POST[$this->id]);
+        if( $this->id == 'dfgdfg' ){
+            //print_r($_POST[$this->id]);
             echo "<br>";
             echo $meta_key;
             echo "<br>";
             print_r($new_meta_value);
-            //err();
+            echo "<br>";echo "<br>";
+            err();
         }
 
         /* If a new meta value was added and there was no previous value, add it. */
-        if ( $new_meta_value && ’ == $meta_value )
+        if ( $new_meta_value && !$meta_value )
             add_post_meta( $post_id, $meta_key, $new_meta_value, true );
 
         /* If the new meta value does not match the old value, update it. */
@@ -102,7 +104,7 @@ class RB_Metabox extends RB_Form_Field_Controller{
             update_post_meta( $post_id, $meta_key, $new_meta_value );
 
         /* If there is no new meta value but an old value exists, delete it. */
-        elseif ( (’ == $new_meta_value || empty($new_meta_value)) && $meta_value )
+        elseif ( (!$new_meta_value || empty($new_meta_value)) && $meta_value )
             delete_post_meta( $post_id, $meta_key, $meta_value );
 
     }

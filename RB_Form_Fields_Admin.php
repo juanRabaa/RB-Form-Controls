@@ -1,9 +1,16 @@
 <?php
 if( is_admin() ){
+    add_action( 'current_screen', function(){
+        $screen = get_current_screen();
+        if( $screen && $screen->taxonomy )
+            wp_enqueue_media();
+    } );
 
     //ADMIN SCRIPTS
     function rb_form_fields_scripts() {
-        //wp_enqueue_script( 'jQuery', 'https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js', '3',false );
+        $screen = get_current_screen();
+        if( $screen && $screen->taxonomy )
+            wp_enqueue_script( 'jQuery', 'https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js', '3',false );
         wp_enqueue_style( 'rb-form-fields-css', plugin_dir_url(__FILE__) . 'style.css' );
         wp_enqueue_script( 'rb-controls-values-manager', plugin_dir_url(__FILE__) . 'js/rb-controls.js', array('jquery'), true );
         //Collapsibles
@@ -12,6 +19,10 @@ if( is_admin() ){
         wp_enqueue_script( 'rb-media-control', plugin_dir_url(__FILE__) . 'js/rb-media-control.js', array('jquery'), true );
         //Sortabe jQuery UI
         wp_enqueue_script( 'jquery-ui-sortable', plugin_dir_url(__FILE__) . 'js/libs/jquery-ui-1.12.1.custom', array('jquery'), true );
+
+        //Gallery control
+        wp_enqueue_style( 'rb-gallery-control', plugin_dir_url(__FILE__) . 'css/rb-gallery-control.css' );
+        wp_enqueue_script( 'rb-gallery-control', plugin_dir_url(__FILE__) . 'js/rb-gallery-control.js', array('jquery'), true );
     }
     add_action( 'admin_enqueue_scripts', 'rb_form_fields_scripts' );
 

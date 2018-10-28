@@ -147,7 +147,8 @@ class RB_Form_Field_Controller{
                         $control_type = $control['type'] ? $control['type'] : 'RB_Input_Control';
                         $renderer = new $control_type($control_value, $settings);
 
-                        ?><div class="group-control-single" data-id="<?php echo $control_ID; ?>"><?php
+                        $class = $this->get_setting('field_classes') . ' ' . $control['field_class'];
+                        ?><div class="group-control-single <?php echo $class; ?>" data-id="<?php echo $control_ID; ?>"><?php
                             $renderer->print_control();
                         ?></div><?php
                     }
