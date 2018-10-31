@@ -136,7 +136,7 @@ class RB_Form_Group_Field{
 
     public function print_group_value_input(){
         ?>
-        <input type="hidden" rb-control-group-value name="<?php echo $this->id; ?>" value="<?php echo esc_attr(json_encode($this->value)); ?>"></input>
+        <input type="hidden" rb-control-group-value name="<?php echo $this->id; ?>" value="<?php echo esc_attr(json_encode($this->value, JSON_UNESCAPED_UNICODE)); ?>"></input>
         <?php
     }
 
@@ -207,8 +207,9 @@ class RB_Form_Repeater_Field{
             <div class="empty-control">
                 <?php $this->print_item('(__COUNTER_PLACEHOLDER)', ''); ?>
             </div>
+
             <!-- REPEATER VALUE -->
-            <input type="hidden" rb-control-repeater-value name="<?php echo $this->id; ?>" value="<?php echo esc_attr(json_encode($this->value)); ?>"></input>
+            <input type="hidden" rb-control-repeater-value name="<?php echo $this->id; ?>" value="<?php echo esc_attr(json_encode($this->value, JSON_UNESCAPED_UNICODE)); ?>"></input>
             <!-- NONCE -->
             <?php if($this->render_nonce) wp_nonce_field( basename( __FILE__ ), $this->id . '_nonce' ); ?>
             <!-- REPEATER CONTROLS -->

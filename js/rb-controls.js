@@ -70,9 +70,11 @@
         },
         getEmptyControlClone: function($panel, newIndex){
             var $emptyControlClone = this.getEmptyControl($panel).clone();
-            $emptyControlClone.html(function(i, oldHTML) {
+            var $tempDiv = $('<div>');
+            $tempDiv.append($emptyControlClone).html(function(i, oldHTML) {
                 return oldHTML.replace(/\(__COUNTER_PLACEHOLDER\)/g, newIndex);
             });
+            $emptyControlClone = $tempDiv.children('.rb-form-control');
             return $emptyControlClone;
         },
         generateNewField: function($panel){
@@ -83,7 +85,7 @@
 
             var newControlIndex = $controls.length > 0 ? $controls.length + 1 : 1;
             var $newControl = this.getEmptyControlClone($panel, newControlIndex);
-
+            console.log($newControl);
             //If the empty repeater message is showing, hide it
             if( this.isEmpty($panel) )
                 $panel.find('.rb-repeater-empty-message').slideUp();
