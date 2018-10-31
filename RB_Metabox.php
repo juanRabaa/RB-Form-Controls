@@ -2,20 +2,17 @@
 class RB_Metabox extends RB_Form_Field_Controller{
     public $meta_id;
     public $render_nonce = true;
-    public $settings = array(
+    public $metabox_settings = array(
         'admin_page'	=> 'post',
         'context'		=> 'advanced',
         'priority'		=> 'default',
         'classes'		=> '',
     );
 
-    public function __construct($id, $meta_id = '', $options = array()) {
-        if( is_array($meta_id) )
-            $options = $meta_id;
-
-        parent::__construct($id, $value, $options);
-        $this->meta_id = $this->settings['meta_id'] = !is_array($meta_id) ? $meta_id : $id;
-
+    public function __construct($id, $metabox_settings, $control_settings ) {
+        $this->metabox_settings = array_merge($this->metabox_settings, $metabox_settings);
+        $this->meta_id = $this->metabox_settings['meta_id'] = $id;
+        parent::__construct($id, null, $control_settings);
         $this->register_metabox();
     }
 
@@ -33,14 +30,15 @@ class RB_Metabox extends RB_Form_Field_Controller{
 
     /* Creates the metabox to be displayed on the post editor screen. */
     public function add_metabox(){
-        extract( $this->settings );
+        extract( $this->metabox_settings );
         add_meta_box( $this->id, $title, array($this, 'render_metabox'), $admin_page, $context, $priority);
         $this->add_metabox_classes();
     }
 
     public function render_metabox($post){
-        $this->value = get_post_meta( $post->ID, $this->meta_id, true );
-        $this->render();
+        $value = get_post_meta( $post->ID, $this->meta_id, true );
+        $renderer = new RB_Form_Field_Controller($this->id, $value, $this->settings);
+        $renderer->render();
     }
 
     public function save_metabox( $post_id, $post ) {
@@ -69,7 +67,7 @@ class RB_Metabox extends RB_Form_Field_Controller{
         }
         //If a group of inputs controls were used
         else if( $this->is_group() ){
-            print_r( "Group json: " . $_POST[$this->id]); echo "<br>";
+            //print_r( "Group json: " . $_POST[$this->id]); echo "<br>";
             $new_meta_value = array();
             if( isset($_POST[$this->id]) )
                 $new_meta_value = json_decode($_POST[$this->id], true);
@@ -117,9 +115,9 @@ class RB_Metabox extends RB_Form_Field_Controller{
          * @param   array   $classes    The current classes on the metabox
          * @return  array               The modified classes on the metabox
         */
-        if( is_array($this->settings['classes']) ){
-            add_filter( "postbox_classes_{$this->settings['admin_page']}_{$this->id}", function( $classes = array() ){
-                foreach ( $this->settings['classes'] as $class ) {
+        if( is_array($this->metabox_settings['classes']) ){
+            add_filter( "postbox_classes_{$this->metabox_settings['admin_page']}_{$this->id}", function( $classes = array() ){
+                foreach ( $this->metabox_settings['classes'] as $class ) {
                     if ( ! in_array( $class, $classes ) ) {
                         $classes[] = sanitize_html_class( $class );
                     }

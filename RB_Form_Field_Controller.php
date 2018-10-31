@@ -12,63 +12,330 @@ class RB_Form_Single_Field{
         $this->id = $id;
         $this->value = $value;
         $this->control_settings = $control_settings;
+        $this->control_settings['id'] = $this->id;
         $this->type = $type;
-        $this->settings = wp_parse_args($this->settings, $settings);
-    }
 
-    public function render_control(){
-        if( class_exists($this->type) && method_exists($this->type, 'render_content') )
-            $renderer = new $this->type( $this->value, $this->control_settings);
+        $this->settings = wp_parse_args($this->settings, $settings);
+
     }
 
     public function render(){
-        $this->render_control();
+        if( class_exists($this->type) && method_exists($this->type, 'render_content') ){
+            ?>
+            <div class="rb-form-control-single-field rb-form-control">
+                <div class="rb-collapsible-body control-content">
+                <?php
+                $this->print_action_controls();
+                $renderer = new $this->type( $this->value, $this->control_settings);
+                $renderer->print_control();
+                ?>
+                </div>
+            </div>
+            <?php
+        }
+    }
+
+    //Retruns the value of one of the repeater settings
+    public function get_setting( $name ){
+        $setting = '';
+        if( isset($this->settings[$name]) )
+            $setting = $this->settings[$name];
+        return $setting;
+    }
+
+
+    public function print_action_controls(){
+        $action_controls = $this->get_setting('action_controls');
+        if( is_array($action_controls) && !empty($action_controls) ):
+        ?>
+            <div class="action-controls">
+                <?php if( in_array('delete_button', $action_controls) ): ?>
+                <div class="delete-button">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <?php endif; ?>
+            </div>
+        <?php
+        endif;
     }
 }
 
+
 class RB_Form_Group_Field{
+    public $id;
+    public $settings = array();
+    public $value = array();
+    public $controls;
+    public $collapsible = false;
+
     /**
     * @param array $value
     *   Controls values.
     *   array( $control_id => $control_value, ... )
-    * @param array $controls_settings
+    * @param array $controls
     *   Controls information. One value for each control.
     *   array( $control_id => $control_settings, ... )
     */
-    public function __construct($id, $value, $controls_settings, $settings = array()) {
+    public function __construct($id, $value, $controls, $settings = array()) {
         $this->id = $id;
         $this->value = $value;
-        $this->controls_settings = $control_settings;
+        $this->controls = $controls;
         $this->settings = wp_parse_args($this->settings, $settings);
+        $this->collapsible = $settings['collapsible'] ? $settings['collapsible'] : false;
     }
 
     public function render(){
-        $value = $this->value;
-        $value_is_set = is_array($value) && !empty($value);
+        $collapsible_class = $this->collapsible ? 'rb-collapsible' : '';
+        $value_is_set = is_array($this->value) && !empty($this->value);
 
-        $this->print_field_value_input();
+        ?>
+        <div data-id="<?php echo $this->id; ?>" class="rb-form-control-field-group rb-form-control <?php echo $collapsible_class; ?>">
+            <?php $this->print_group_value_input(); ?>
+            <?php
+                if( $this->collapsible )
+                    $this->print_collapsible_header();
+            ?>
+            <div class="rb-collapsible-body control-content">
+                <?php
+                    if( !$this->collapsible && is_array($action_controls) )
+                        $this->print_action_controls( $action_controls );
+                ?>
+                <div class="controls">
+                <?php
+                foreach($this->controls as $control_ID => $control){
+                    $control_settings = $control;
+                    $control_settings['id'] = $this->get_input_id($control_ID);
+                    $control_value = $value_is_set ? $this->value[$control_ID] : '';
+                    $control_type = $control['type'] ? $control['type'] : 'RB_Input_Control';
 
-        foreach( $this->controls_settings as $control_id => $control_settings ){
-            $control_group_id = $this->control_id($control_id);
-            $control_value = $value_is_set ? $value[$control_ID] : '';
-            $control_type = $control_settings['type'] ? $control_settings['type'] : 'RB_Input_Control';
-            //USAR EL RB_Form_Single_Field O SOLO EL CONTROL????
-            $control_form_field = new RB_Form_Single_Field( $control_group_id, $control_value, $control_settings, $control_type );
-            $control_form_field->render_control();
-        }
+                    if( $control_settings['repeater'] ){
+                        $repeater_settings = is_array($control_settings['repeater']) ? $control_settings['repeater'] : array();
+                        $field_controller = new RB_Form_Repeater_Field($control_settings['id'], $control_value, array($control), $items_settings = array(
+                            'collapsible'   => true,
+                        ), $repeater_settings);
+                    }
+                    else{
+                        $field_controller = new RB_Form_Single_Field($control_settings['id'], $control_value, $control_settings, $control_type);
+                    }
+
+                    $class = $this->get_setting('field_classes') . ' ' . $control['field_class'];
+                    ?><div class="group-control-single <?php echo $class; ?>" data-id="<?php echo $control_ID; ?>"><?php
+                        $field_controller->render();
+                    ?></div><?php
+                }
+                ?>
+                </div>
+            </div>
+        </div>
+        <?php
     }
 
-    public function control_id($control_id){
+    public function get_input_id($control_id){
         return $this->id . '-' . $control_id;
     }
 
-    public function print_field_value_input(){
+    public function print_group_value_input(){
         ?>
         <input type="hidden" rb-control-group-value name="<?php echo $this->id; ?>" value="<?php echo esc_attr(json_encode($this->value)); ?>"></input>
         <?php
     }
+
+    public function get_setting( $name ){
+        $setting = '';
+        if( isset($this->settings[$name]) )
+            $setting = $this->settings[$name];
+        return $setting;
+    }
+
+    // =============================================================================
+    //
+    // =============================================================================
+    public function print_action_controls(){
+        $action_controls = $this->get_setting('action_controls');
+        if( is_array($action_controls) && !empty($action_controls) ):
+        ?>
+            <div class="action-controls">
+                <?php if( in_array('delete_button', $action_controls) ): ?>
+                <div class="delete-button">
+                    <i class="fas fa-trash-alt"></i>
+                </div>
+                <?php endif; ?>
+            </div>
+        <?php
+        endif;
+    }
+    // =========================================================================
+    // COLLAPSIBLE
+    // =========================================================================
+    public function print_collapsible_header( $options = array() ){
+        $defaults = array(
+            'title' => $this->settings['title'] ? $this->settings['title'] : 'Item',
+            'link'  => '',
+        );
+        $settings = $defaults;
+        if( is_array($this->collapsible) )
+            $settings = array_merge($settings, $this->collapsible);
+
+        ?>
+        <div class="rb-collapsible-header container">
+            <h1 data-title="<?php echo $settings['title']; ?>" class="title"><?php echo $settings['title']; ?></h1>
+            <?php $this->print_action_controls(); ?>
+        </div>
+        <?php
+    }
 }
 
+class RB_Form_Repeater_Field{
+    public $id;
+    public $settings = array();
+    public $value = array();
+    public $controls = array();
+    public $items_settings = array();
+
+    public function __construct($id, $value, $controls, $items_settings = array(), $settings = array()) {
+        $this->id = $id;
+        $this->value = $value;
+        $this->controls = $controls;
+        $this->items_settings = $items_settings;
+        $this->settings = wp_parse_args($this->settings, $settings);
+    }
+
+    public function render(){
+        ?>
+        <div class="rb-form-control-repeater" data-id="<?php echo $this->id; ?>" data-type="<?php echo $this->get_repeater_type(); ?>" <?php echo $this->get_dinamic_title_attr(); ?>
+        <?php echo $this->get_base_title_attr(); ?>
+        data-control="<?php echo esc_attr($this->get_item_as_string('(__COUNTER_PLACEHOLDER)', '')); ?>">
+            <!-- REPEATER VALUE -->
+            <input type="hidden" rb-control-repeater-value name="<?php echo $this->id; ?>" value="<?php echo esc_attr(json_encode($this->value)); ?>"></input>
+            <!-- NONCE -->
+            <?php if($this->render_nonce) wp_nonce_field( basename( __FILE__ ), $this->id . '_nonce' ); ?>
+            <!-- REPEATER CONTROLS -->
+            <div class="controls" <?php echo $this->get_accordion_attr(); ?>>
+            <?php
+            $this->item_index = 1;
+            if(is_array($this->value)){
+                foreach($this->value as $value){
+                    $this->print_item($this->item_index, $value);
+                    $this->item_index++;
+                }
+            }
+            //There is not a value to work on
+            else{
+                //prints an empty first item
+                $this->print_item('1', '');
+            }
+            ?>
+            </div>
+            <!-- End controls -->
+            <?php $this->print_empty_message(); ?>
+            <!-- End empty message -->
+            <div class="repeater-add-button">
+                <i class="add-button fas fa-plus"></i>
+            </div>
+        </div>
+        <?php
+    }
+
+    public function get_item_as_string($item_index, $item_value){
+        ob_start();
+        $this->print_item($item_index, $item_value);
+        return ob_get_clean();
+    }
+
+    public function print_item($item_index, $item_value){
+        $renderer = null;
+        $item_id = $this->id  . '__' . $item_index;
+
+        if( $this->is_group() ){
+            $renderer = new RB_Form_Group_Field($item_id, $item_value, $this->controls, array(
+                'title'             => str_replace('($n)',$item_index,$this->get_setting('item_title')),
+                'collapsible'       => $this->get_items_setting('collapsible'),
+                'action_controls'   => array('delete_button'),
+            ));
+        }
+        else{
+            $control_settings = reset($this->controls);//First item in the controls array
+            $control_type = $control_settings['type'] ? $control_settings['type'] : 'RB_Input_Control';
+            $renderer = new RB_Form_Single_Field($item_id, $item_value, $control_settings, $control_type, array(
+                //'title'             => str_replace('($n)',$this->item_index,$this->get_setting('item_title')),
+                'action_controls'   => array('delete_button'),
+            ));
+        }
+
+        if($renderer)
+            $renderer->render();
+    }
+    // =========================================================================
+    // ATTRIBUTES
+    // =========================================================================
+    public function get_accordion_attr(){
+        return $this->get_setting('accordion') ? 'data-rb-accordion' : '';
+    }
+
+    public function get_dinamic_title_attr(){
+        return $this->get_setting('title_link') ? 'data-title-link="'. $this->settings['title_link'] . '"' : '';
+    }
+
+    public function get_base_title_attr(){
+        return $this->get_setting('item_title') ? 'data-base-title="'.$this->settings['item_title'].'"' : '';
+    }
+
+    // =========================================================================
+    //
+    // =========================================================================
+    public function print_empty_message(){
+        ?>
+        <div class="rb-repeater-empty-message">
+            <?php
+            $message = $this->get_setting('empty_message');
+            $message = $message ? $message : 'Click on the button below to start adding content';
+            //If the message is a function
+            if( is_callable($message) )
+                $message($message);
+            //If the message is a string
+            else if ( is_string($message) ):
+            ?>
+                <p><?php echo $message; ?></p>
+            <?php
+            endif;
+            ?>
+        </div>
+        <?php
+    }
+    // =========================================================================
+    // INFORMATION GETTERS
+    // =========================================================================
+    function get_repeater_type(){
+        return $this->is_group() ? 'group' : 'single';
+    }
+
+    //If the repeater is items are groups on inputs
+    public function is_group(){
+        return is_array($this->controls) && count($this->controls) > 1;
+    }
+
+    //Returns the value of one of the items settings
+    public function get_items_setting( $name ){
+        $setting = isset($this->items_settings[$name]) ? $this->items_settings[$name] : '';
+        return $setting;
+    }
+
+    //Retruns the value of one of the repeater settings
+    public function get_setting( $name ){
+        $setting = '';
+        if( isset($this->settings[$name]) )
+            $setting = $this->settings[$name];
+        return $setting;
+    }
+
+}
+
+
+
+
+// =============================================================================
+//
+// =============================================================================
 class RB_Form_Field_Controller{
     public $id;
     public $type;
@@ -94,146 +361,6 @@ class RB_Form_Field_Controller{
         $this->value = $value;
     }
 
-    //Render the control when only one was provided
-    public function content_render($args = array()){
-        $value = isset($args['value']) ? $args['value'] : $this->value;
-        $control_id = isset($args['id']) ? $args['id'] : $this->id;
-
-        $control = reset($this->controls);//First item in the controls array
-        $settings = array_merge($this->settings, $control);
-        $settings['id'] = $control_id;
-        $control_type = $control['type'] ? $control['type'] : 'RB_Input_Control';
-        $renderer = new $control_type($value, $settings);
-
-        ?>
-        <div class="rb-form-control-single-field rb-form-control">
-            <div class="collapsible-body control-content">
-            <?php
-            $this->print_action_controls( $args['action_controls'] );
-            $renderer->print_control();
-            ?>
-            </div>
-        </div>
-        <?php
-    }
-
-    //Renders the controls in the controls array
-    public function render_group($args = array()){
-        $value = isset($args['value']) ? $args['value'] : $this->value;
-        $prefix_id = isset($args['prefix_id']) ? $args['prefix_id'] : $this->id;
-        $collapsible_class = $this->collapsible ? 'rb-collapsible' : '';
-
-        $value_is_set = is_array($value) && !empty($value);
-        $controls = $this->settings['controls'];
-        if( is_array($controls) ){
-            ?>
-            <div data-id="<?php echo $prefix_id; ?>" class="rb-form-control-field-group rb-form-control <?php echo $collapsible_class; ?>">
-                <input type="hidden" rb-control-group-value name="<?php echo $prefix_id; ?>" value="<?php echo esc_attr(json_encode($value)); ?>"></input>
-                <?php
-                    if( $this->collapsible )
-                        $this->print_collapsible_header( array( 'action_controls' => $args['action_controls'] ) );
-                ?>
-                <div class="collapsible-body control-content">
-                    <?php
-                        if( !$this->collapsible )
-                            $this->print_action_controls( $args['action_controls'] );
-                    ?>
-                    <div class="controls">
-                    <?php
-                    foreach($controls as $control_ID => $control){
-                        $settings = array_merge($this->settings, $control);
-                        $settings['id'] = $prefix_id . '-' . $control_ID;
-                        $control_value = $value_is_set ? $value[$control_ID] : '';
-                        $control_type = $control['type'] ? $control['type'] : 'RB_Input_Control';
-                        $renderer = new $control_type($control_value, $settings);
-
-                        $class = $this->get_setting('field_classes') . ' ' . $control['field_class'];
-                        ?><div class="group-control-single <?php echo $class; ?>" data-id="<?php echo $control_ID; ?>"><?php
-                            $renderer->print_control();
-                        ?></div><?php
-                    }
-                    ?>
-                    </div>
-                </div>
-            </div><?php
-        }
-    }
-
-    public function render_repeater($args = array()){
-        $value = isset($args['value']) ? $args['value'] : $this->value;
-        $repeater_type = $this->is_group() ? 'group' : 'single';
-        $item_title = isset($args['item_title']) ? $args['item_title'] : $this->item_title;
-        $this->collapsible = isset($this->collapsible) ? $this->collapsible : true;
-        $collapsible_type = $this->get_collapsible_type();
-        $accordion_attr = $collapsible_type == 'accordion' ? 'data-rb-accordion' : '';
-        $dinanmic_title_attr = $this->settings['title_link'] ? 'data-title-link="'. $this->settings['title_link'] . '"' : '';
-        $base_title_attr = $this->settings['item_title'] ? 'data-base-title="'.$this->settings['item_title'].'"' : '';
-        $this->item_index = '(__COUNTER_PLACEHOLDER)';
-
-        ?>
-        <div class="rb-form-control-repeater" data-id="<?php echo $this->id; ?>" data-type="<?php echo $repeater_type; ?>" <?php echo $dinanmic_title_attr; ?>
-            <?php echo $base_title_attr; ?>
-            data-control="<?php echo esc_attr($this->ob_get_control(
-                array(
-                    'value'            => '',
-                    'action_controls'  => array( 'delete_button' ),
-                    'prefix_id'        => $this->id  . '__(__COUNTER_PLACEHOLDER)',
-                    'id'               => $this->id  . '__(__COUNTER_PLACEHOLDER)',
-            ))); ?>">
-            <!-- REPEATER VALUE -->
-            <input type="hidden" rb-control-repeater-value name="<?php echo $this->id; ?>" value="<?php echo esc_attr(json_encode($value)); ?>"></input>
-            <?php
-                if($this->render_nonce)
-                    wp_nonce_field( basename( __FILE__ ), $this->id . '_nonce' );
-            ?>
-            <!-- REPEATER CONTROLS -->
-            <div class="controls" <?php echo $accordion_attr; ?>>
-        <?php
-        $this->item_index = 1;
-        if(is_array($value)){
-
-            if( $this->is_group() ){
-                foreach($value as $group_value){
-                    $this->render_group(array(
-                        'value'             => $group_value,
-                        'prefix_id'         => $this->id  . '__' . $count, // id__1, id__2, id__3, ...
-                        'action_controls'   => array( 'delete_button' ),
-                    ));
-                    $this->item_index++;
-                }
-            }
-            else{
-                foreach($value as $control_value){
-                    $this->content_render(array(
-                        'value'             => $control_value,
-                        'id'                => $this->id  . '__' . $count,
-                        'action_controls'   => array( 'delete_button' ),
-                    ));
-                    $this->item_index++;
-                }
-            }
-        }
-        //There is not a value to work on
-        else{
-            echo $this->ob_get_control( array(
-                'action_controls' => array('delete_button'),
-                'prefix_id'       => $this->id  . '__' . 1,
-                'id'       => $this->id  . '__' . 1,
-            ));
-        }
-
-        ?>
-            </div>
-            <!-- End controls -->
-            <?php $this->print_empty_message(); ?>
-            <!-- End empty message -->
-            <div class="repeater-add-button">
-                <i class="add-button fas fa-plus"></i>
-            </div>
-        </div>
-        <?php
-    }
-
     //Renders the controller accordingly to the settings passed
     public function render(){
         if( $this->is_repeater() ){
@@ -246,68 +373,46 @@ class RB_Form_Field_Controller{
             if($this->is_group())
                 $this->render_group();
             else
-                $this->content_render();
+                $this->render_single();
         }
     }
 
+    //Render the control when only one was provided
+    public function render_single($args = array()){
+        $control_settings = reset($this->controls);//First item in the controls array
+        $control_settings['id'] = $control_id;
+        $control_type = $control_settings['type'] ? $control_settings['type'] : 'RB_Input_Control';
+        $single_field = new RB_Form_Single_Field($this->id, $this->value, $control_settings, $control_type);
+        $single_field->render();
+    }
+
+    //Renders the controls in the controls array
+    public function render_group($args = array()){
+        if( is_array($this->settings['controls']) ){
+            $group_settings = is_array($args['group_settings']) ? $args['group_settings'] : array();
+            $group = new RB_Form_Group_Field($this->id, $this->value, $this->settings['controls'], $group_settings);
+            $group->render();
+        }
+    }
+
+    //Renders a repeater of controls
+    public function render_repeater($args = array()){
+        $repeater = new RB_Form_Repeater_Field($this->id, $this->value, $this->controls, $items_settings = array(
+            'collapsible'   => true,
+        ), $this->settings);
+
+        $repeater->render();
+    }
+
+    // =========================================================================
+    //
+    // =========================================================================
     public function is_group(){
         return is_array($this->controls) && count($this->controls) > 1;
     }
 
     public function is_repeater(){
         return $this->settings['repeater'] == true;
-    }
-
-
-    public function get_setting( $name ){
-        $setting = '';
-        if( isset($this->settings[$name]) )
-            $setting = $this->settings[$name];
-        return $setting;
-    }
-
-    //Returns the control as a string
-    public function ob_get_control( $args = array() ){
-        ob_start();
-        if($this->is_group())
-            $this->render_group( $args );
-        else
-            $this->content_render( $args );
-        return ob_get_clean();
-    }
-
-    public function print_action_controls( $action_controls ){
-        if( is_array($action_controls) && !empty($action_controls) ):
-        ?>
-            <div class="action-controls">
-                <?php if( in_array('delete_button', $action_controls) ): ?>
-                <div class="delete-button">
-                    <i class="fas fa-trash-alt"></i>
-                </div>
-                <?php endif; ?>
-            </div>
-        <?php
-        endif;
-    }
-
-    public function print_empty_message(){
-        ?>
-        <div class="rb-repeater-empty-message">
-            <?php
-            $message = $this->get_setting('empty_message');
-            $message = $message ? $message : 'Click on the button below to start adding content :)';
-            //If the message is a function
-            if( is_callable($message) )
-                $message($message);
-            //If the message is a string
-            else if ( is_string($message) ):
-            ?>
-                <p><?php echo $message; ?></p>
-            <?php
-            endif;
-            ?>
-        </div>
-        <?php
     }
 
     // =========================================================================
@@ -321,24 +426,5 @@ class RB_Form_Field_Controller{
             }
         }
         return $type;
-    }
-
-    public function print_collapsible_header( $options = array() ){
-        $defaults = array(
-            'title' => $this->settings['item_title'] ? $this->settings['item_title'] : 'Item',
-            'link'  => '',
-        );
-        $settings = $defaults;
-        if( is_array($this->collapsible) )
-            $settings = array_merge($settings, $this->collapsible);
-
-        if( $this->is_repeater() && $this->item_index )
-            $settings['title']  = str_replace('($n)',$this->item_index,$settings['title']);
-        ?>
-        <div class="collapsible-header container">
-            <h1 data-title="<?php echo $settings['title']; ?>" class="title"><?php echo $settings['title']; ?></h1>
-            <?php $this->print_action_controls( $options['action_controls'] ); ?>
-        </div>
-        <?php
     }
 }

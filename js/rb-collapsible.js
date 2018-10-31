@@ -14,7 +14,7 @@
         }
 
         function closeCollapsible($collapsible){
-            var $body = $collapsible.children('.collapsible-body');
+            var $body = $collapsible.children('.rb-collapsible-body');
 
             animationStarts($collapsible)
             $body.stop().slideUp(200, function(){
@@ -24,7 +24,7 @@
         }
 
         function openCollapsible($collapsible){
-            var $body = $collapsible.children('.collapsible-body');
+            var $body = $collapsible.children('.rb-collapsible-body');
 
             $collapsible.addClass('opening');
             animationStarts($collapsible);
@@ -62,7 +62,7 @@
             }
         }
 
-        $(document).on('click', '.rb-collapsible .collapsible-header', function(){
+        $(document).on('click', '.rb-collapsible .rb-collapsible-header', function(){
             var $collapsible = $(this).closest('.rb-collapsible');
             var $accordion = $collapsible.parent('[data-rb-accordion]');
             if($accordion.length > 0)

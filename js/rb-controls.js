@@ -90,16 +90,18 @@
                 $controlHtml.slideDown(200);
             }, 1);
         },
-        deleteField: function($panel, $field){
+        deleteField: function($panel, $field, cb){
             var repeaterManager = this;
 
-            if( $panel.children('.controls').find('.rb-form-control').length == 1 )
+            if( $panel.children('.controls').children('.rb-form-control').length == 1 )
                 $panel.find('.rb-repeater-empty-message').slideDown();
 
             $field.slideUp(200, function(){
                 $field.remove();
                 repeaterManager.updateControlsIds($panel);
                 repeaterManager.updateControlsTitle($panel);
+                if(cb)
+                    cb();
             });
         },
         updateControlsIds: function($panel){
@@ -147,7 +149,7 @@
             if($title.length){
                 if(titleLink){
                     var $linkedControl = $group.find('[data-id='+titleLink+']');
-                    console.log($linkedControl);
+                    //console.log($linkedControl);
                     if( $linkedControl.length ){
                         var $valueInput = $linkedControl.find('[rb-control-value]').first();
                         if( $valueInput.length ){
@@ -172,8 +174,8 @@
             var baseTitle = $panel.attr('data-base-title');
 
             var $controlsContainer = $panel.children('.controls');
-                var $controls = $controlsContainer.children('.rb-form-control');
-
+            var $controls = $controlsContainer.children('.rb-form-control');
+            //console.log($controls);
             $controls.each(function(index){
                 var newTitle = '';
                 var $title = $(this).closest('.rb-form-control').find('[data-title]');
@@ -191,7 +193,7 @@
                         }
                     }
                 }
-                if( newTitle == ''){
+                if( newTitle == '' && baseTitle ){
                     newTitle = baseTitle.replace("($n)", index + 1);
                 }
 
@@ -209,17 +211,37 @@
     var groupType = {
         getValue: function($panel){
             var finalValue = {};
+            var isInRepeater = $panel.closest('.rb-form-control-repeater').length != 0;
+            var $inputs = $panel.find('[rb-control-value], [rb-control-repeater-value]');
+            //We remove the inputs inside a repeater, because we only want the repeater whole value
+            $inputs = $inputs.filter( function(){
+                var $inputParentRepeater = $(this).closest('.rb-form-control-repeater');
+                //If the field is inside a repeater
+                if( $inputParentRepeater.length ){
+                    var repeaterIsInsideGroup = $inputParentRepeater.closest('.rb-form-control-field-group').length != 0;
+                    //If the repeater is inside the group (is a field), and the input is not a repeater value
+                    if(repeaterIsInsideGroup && $(this).attr('rb-control-repeater-value') === undefined)
+                        return false;
+                }
+                return true;
+            });
 
-            var $inputs = $panel.find('[rb-control-value]');
             var groupID = this.getGroupBaseID($panel);
 
             $inputs.each(function(){
                 var key = $(this).attr('name').replace(groupID + '-','');
-                finalValue[key] = getInputValue($(this));
-                console.log(key, finalValue[key]);
+                var value = getInputValue($(this));
+                //If it is a repeater, we remove the stringify to avoid a doble conversion
+                if($(this).attr('rb-control-repeater-value') != undefined)
+                    value = JSON.parse(value);
+
+                //console.log(value);
+                finalValue[key] = value;
+                //console.log(key, finalValue[key]);
             });
 
-            console.log(JSON.stringify(finalValue));
+            //console.log(finalValue);
+            //console.log(JSON.stringify(finalValue));
 
             return JSON.stringify(finalValue);
         },
@@ -271,9 +293,9 @@
         // =============================================================================
         // GROUP VALUE UPDATE
         // =============================================================================
-        $(document).on('input change', '.rb-form-control-field-group [rb-control-value]', function(){
+        $(document).on('input change', '.rb-form-control-field-group :not(.rb-form-control-repeater) [rb-control-value], .rb-form-control-field-group [rb-control-repeater-value]', function(){
             $panel = $(this).closest('.rb-form-control-field-group');
-            console.log($(this));
+            //console.log($(this));
             if($panel.length != 0){
                 groupType.updateValue($panel);
             }
@@ -290,6 +312,7 @@
         });
         //When it is a single input repeater
         $(document).on('change input', '.rb-form-control-repeater [rb-control-value]', function(){
+            console.log('update single value');
             var $panel = $(this).closest('.rb-form-control-repeater');
             var isGroupRepeater = repeaterType.isGroupRepeater($panel);
 
@@ -332,14 +355,15 @@
         // =====================================================================
         // REMOVE ITEM
         // =====================================================================
-        $(document).on('click', '.rb-form-control-repeater > .controls > .rb-form-control .action-controls > .delete-button,  .rb-form-control-repeater > .controls > .rb-form-control > .collapsible-header > .action-controls > .delete-button',
+        $(document).on('click', '.rb-form-control-repeater > .controls > .rb-form-control .action-controls > .delete-button,  .rb-form-control-repeater > .controls > .rb-form-control > .rb-collapsible-header > .action-controls > .delete-button',
         function(event){
-            console.log(event);
+            //console.log(event);
             event.stopPropagation();
             var $panel = $(this).closest('.rb-form-control-repeater');
             var $fieldItem = $(this).closest('.rb-form-control');
-            repeaterType.deleteField($panel, $fieldItem);
-            repeaterType.updateValue($panel);
+            repeaterType.deleteField($panel, $fieldItem, function(){
+                repeaterType.updateValue($panel);
+            });
         });
 
         // =====================================================================

@@ -23,6 +23,9 @@ if( is_admin() ){
         //Gallery control
         wp_enqueue_style( 'rb-gallery-control', plugin_dir_url(__FILE__) . 'css/rb-gallery-control.css' );
         wp_enqueue_script( 'rb-gallery-control', plugin_dir_url(__FILE__) . 'js/rb-gallery-control.js', array('jquery'), true );
+
+        //Text list control
+        wp_enqueue_style( 'rb-text-list-control', plugin_dir_url(__FILE__) . 'css/rb-text-list-control.css' );
     }
     add_action( 'admin_enqueue_scripts', 'rb_form_fields_scripts' );
 

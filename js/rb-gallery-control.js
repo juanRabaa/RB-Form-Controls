@@ -12,7 +12,7 @@
         };
 
         $(window).resize(function(){
-            $('.rb-collapsible-title + .rb-collapsible-body').finish();
+            $('.rb-collapsible-title + .rb-rb-collapsible-body').finish();
         });
 
         $(document).ready(function(){
