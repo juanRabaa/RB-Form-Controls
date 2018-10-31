@@ -203,8 +203,10 @@ class RB_Form_Repeater_Field{
     public function render(){
         ?>
         <div class="rb-form-control-repeater" data-id="<?php echo $this->id; ?>" data-type="<?php echo $this->get_repeater_type(); ?>" <?php echo $this->get_dinamic_title_attr(); ?>
-        <?php echo $this->get_base_title_attr(); ?>
-        data-control="<?php echo esc_attr($this->get_item_as_string('(__COUNTER_PLACEHOLDER)', '')); ?>">
+        <?php echo $this->get_base_title_attr(); ?>>
+            <div class="empty-control">
+                <?php $this->print_item('(__COUNTER_PLACEHOLDER)', ''); ?>
+            </div>
             <!-- REPEATER VALUE -->
             <input type="hidden" rb-control-repeater-value name="<?php echo $this->id; ?>" value="<?php echo esc_attr(json_encode($this->value)); ?>"></input>
             <!-- NONCE -->

@@ -28,7 +28,7 @@
             var finalValue = [];
 
             if( this.isGroupRepeater($panel) ){
-                var $inputs = $panel.find('[rb-control-group-value]');
+                var $inputs = $panel.children('.controls').find('[rb-control-group-value]');
                 $inputs.each(function(){
                     var $groupPanel = $(this).closest('.rb-form-control-field-group');
                     var groupValue = JSON.parse(groupType.getValue($groupPanel));
@@ -39,7 +39,7 @@
                 finalValue = JSON.stringify(finalValue);
             }
             else{
-                var $singlePanels = $panel.find('.rb-form-control-single-field');
+                var $singlePanels = $panel.children('.controls').find('.rb-form-control-single-field');
                 $singlePanels.each(function(){
                     var value = singleType.getValue($(this));
                     finalValue.push(value);
@@ -65,6 +65,16 @@
         getGroupBaseID: function($panel){
             return $panel.attr('data-id');
         },
+        getEmptyControl: function($panel){
+            return $panel.children('.empty-control').children('.rb-form-control');
+        },
+        getEmptyControlClone: function($panel, newIndex){
+            var $emptyControlClone = this.getEmptyControl($panel).clone();
+            $emptyControlClone.html(function(i, oldHTML) {
+                return oldHTML.replace(/\(__COUNTER_PLACEHOLDER\)/g, newIndex);
+            });
+            return $emptyControlClone;
+        },
         generateNewField: function($panel){
             var baseControlHtml = $panel.attr('data-control');
 
@@ -72,22 +82,19 @@
             var $controls = $controlsContainer.children('.rb-form-control');
 
             var newControlIndex = $controls.length > 0 ? $controls.length + 1 : 1;
-            var repeaterID = $panel.attr('data-id');
-
-            var finalControlHtml = baseControlHtml.replace(/\(__COUNTER_PLACEHOLDER\)/g, newControlIndex);
-            var $controlHtml = $(finalControlHtml);
+            var $newControl = this.getEmptyControlClone($panel, newControlIndex);
 
             //If the empty repeater message is showing, hide it
             if( this.isEmpty($panel) )
                 $panel.find('.rb-repeater-empty-message').slideUp();
 
             //Insert new control
-            $controlHtml.appendTo($controlsContainer);
+            $newControl.appendTo($controlsContainer);
 
             //Animate insertion
             setTimeout(function(){
-                $controlHtml.css('display', 'none');
-                $controlHtml.slideDown(200);
+                $newControl.css('display', 'none');
+                $newControl.slideDown(200);
             }, 1);
         },
         deleteField: function($panel, $field, cb){
