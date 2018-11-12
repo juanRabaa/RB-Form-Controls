@@ -223,8 +223,8 @@
                 +'</div>';
 
             //Insert before the add new element control
-            $imgBoxesHolder.append( stringElement );
-
+            $(stringElement).insertBefore( $imgBoxesHolder.children('.rb-tax-add') );
+            //$imgBoxesHolder.append( stringElement );
         }
 
         function removeImageBox($imageBox){

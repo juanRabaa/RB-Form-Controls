@@ -325,9 +325,9 @@ class RB_Images_Gallery_Control extends RB_Metabox_Control{
                     endforeach;
                 endif;
                 ?>
-            </div>
-            <div class="rb-tax-add rb-gallery-box">
-                <i class="fas fa-plus rb-add"></i>
+                <div class="rb-tax-add rb-gallery-box">
+                    <i class="fas fa-plus rb-add"></i>
+                </div>
             </div>
         </div>
         <?php
