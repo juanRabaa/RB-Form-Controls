@@ -19,7 +19,7 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
     public $terms;
     public $render_nonce = true;
     public $add_form = false;
-    public $settings = array(
+    public $metabox_settings = array(
         'admin_page'	=> 'post',
         'context'		=> 'advanced',
         'priority'		=> 'default',
@@ -27,14 +27,10 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
         'terms'         => array('post_tag'),
     );
 
-    public function __construct($id, $meta_id = '', $options = array()) {
-        if( is_array($meta_id) )
-            $options = $meta_id;
-
-        parent::__construct($id, $value, $options);
-        $this->meta_id = $this->settings['meta_id'] = !is_array($meta_id) ? $meta_id : $id;
-        $this->terms = $this->settings['terms'];
-
+    public function __construct($id, $metabox_settings, $control_settings) {
+        $this->metabox_settings = wp_parse_args($metabox_settings, $this->metabox_settings);
+        $this->terms = $this->metabox_settings['terms'];
+        parent::__construct($id, null, $control_settings);
         $this->register_form_field();
     }
 
@@ -64,7 +60,7 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
         $this->update_value($term_obj);
         ?>
         <tr class="form-field rb-tax-form-field">
-            <th scope="row" valign="top"><label for="<?php echo $this->id; ?>"><?php _e( $this->title ); ?></label></th>
+            <th scope="row" valign="top"><label for="<?php echo $this->id; ?>"><?php _e( $this->metabox_settings['title'] ); ?></label></th>
             <td>
                 <?php $this->term_edit_form_fields_container($term_obj); ?>
             </td>
@@ -77,7 +73,7 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
         $this->update_value($term_obj);
         ?>
         <div class="rb-tax-field">
-            <?php parent::render(); ?>
+            <?php $this->render(); ?>
         </div>
         <?php
     }
@@ -86,8 +82,8 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
     public function term_add_form_fields_container($term_obj){
         $this->update_value( $term_obj );
         ?>
-        <div class="form-field add-form-field <?php echo $this->term_add_container_class; ?>">
-            <label for="tag-description"><?php echo $this->title; ?></label>
+        <div class="form-field add-form-field <?php echo $this->metabox_settings['term_add_container_class']; ?>">
+            <label for="tag-description"><?php echo $this->metabox_settings['title']; ?></label>
             <?php $this->term_add_form_fields($term_obj); ?>
         </div>
         <?php
@@ -100,14 +96,14 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
     // GETTERS
     // =========================================================================
     protected function get_column_name(){
-        if( $this->settings['column'] && is_array( $this->settings['column'] ) && $this->settings['column'][1] )
-            return $this->settings['column'][1];
+        if( $this->metabox_settings['column'] && is_array( $this->metabox_settings['column'] ) && $this->metabox_settings['column'][1] )
+            return $this->metabox_settings['column'][1];
         return false;
     }
 
     protected function get_column_id(){
-        if( $this->settings['column'] && is_array( $this->settings['column'] ) && $this->settings['column'][0] )
-            return $this->settings['column'][0];
+        if( $this->metabox_settings['column'] && is_array( $this->metabox_settings['column'] ) && $this->metabox_settings['column'][0] )
+            return $this->metabox_settings['column'][0];
         return false;
     }
 
@@ -132,7 +128,7 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
         if ( $column_id == $this->get_column_id() ):
             $this->update_value($term_obj);
         ?>
-            <div class="rb-taxonomy-column-content <?php echo $this->column_class; ?>">
+            <div class="rb-taxonomy-column-content <?php echo $this->metabox_settings['column_class']; ?>">
             <?php
                 if ($column_id == $this->get_column_id() ){
                     $this->manage_taxonomy_columns_fields($deprecated, $column_id, $term_id);
@@ -182,7 +178,7 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
             $new_meta_value = ( isset( $_POST[$this->id] ) ?  $_POST[$this->id] : ’ );
         }
         /* Get the meta key. */
-        $meta_key = $this->meta_id;
+        $meta_key = $this->id;
 
         /* Get the meta value of the custom field key. */
         $meta_value = get_term_meta( $term_id, $meta_key, true );

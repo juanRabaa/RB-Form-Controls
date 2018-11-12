@@ -64,7 +64,7 @@ class RB_tinymce_control extends RB_Metabox_Control{
         <label for="<?php echo $id; ?>"><?php echo $label; ?></label>
         <br />
         <?php endif;
-        wp_editor( esc_attr( $this->value ), $id, array(
+        wp_editor( esc_attr( $this->value ), esc_attr( $id . '_tinymce' ), array(
             'wpautop'       => true,
             'media_buttons' => false,
             'textarea_name' => $id,
@@ -334,7 +334,6 @@ class RB_Images_Gallery_Control extends RB_Metabox_Control{
     }
 }
 
-
 class RB_Media_Control extends RB_Metabox_Control{
 
     public function render_content(){
@@ -350,6 +349,54 @@ class RB_Media_Control extends RB_Metabox_Control{
                 <input rb-control-value class="rb-tax-value rb-sub-input"  name="<?php echo $id; ?>" type="hidden" value="<?php echo esc_attr($this->value); ?>"></input>
             </div>
             <div class="remove-image-button"><i class="fas fa-times" title="Remove image"></i></div>
+        </div>
+        <?php
+    }
+}
+
+class RB_Posts_Dropdown extends RB_Metabox_Control{
+    public $options = array(
+        'class'         => '',
+        'option_none'   => 'None',
+        'post_type'     => 'post',
+    );
+
+    public function __construct($value, $settings) {
+         parent::__construct($value, $settings);
+         $this->options = wp_parse_args( $settings['args'], $this->options );
+    }
+
+    public function get_dropdown(){
+        extract($this->settings);
+        extract($this->options);
+
+        /*Dropdown generation*/
+        $dropdown = "<select
+            name='$this->id'
+            class='$class rb-tax-value'
+            rb-control-value
+        >";
+        $dropdown .= '<option value=""'.selected($this->value, $post->ID, false).'>'.__( $option_none ).'</option>';
+        $posts = get_posts(array(
+            'posts_per_page'       	=> -1,
+            'orderby'               => 'title',
+            'order'                 => 'ASC',
+            'post_type'             => $post_type,
+        ));
+        foreach ( $posts as $post ){
+            $dropdown .= '<option value="'. $post->ID .'"'.selected($this->value, $post->ID, false).'>'.$post->post_title.'</option>';
+        }
+
+        $dropdown .= "</select>";
+
+        return $dropdown;
+    }
+
+    public function render_content(){
+        $this->print_control_header();
+        ?>
+        <div class="rb-post-selection">
+            <?php echo $this->get_dropdown();  ?>
         </div>
         <?php
     }

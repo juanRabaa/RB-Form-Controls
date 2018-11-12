@@ -37,8 +37,8 @@ class RB_Metabox extends RB_Form_Field_Controller{
 
     public function render_metabox($post){
         $value = get_post_meta( $post->ID, $this->meta_id, true );
-        $renderer = new RB_Form_Field_Controller($this->id, $value, $this->settings);
-        $renderer->render();
+        $this->value = $value;
+        $this->render();
     }
 
     public function save_metabox( $post_id, $post ) {
@@ -83,13 +83,18 @@ class RB_Metabox extends RB_Form_Field_Controller{
         /* Get the meta value of the custom field key. */
         $meta_value = get_post_meta( $post_id, $meta_key, true );
 
-        if( $this->id == 'dfgdfg' ){
+        if( $this->id == 'sdfsdfsdfsf' ){
             //print_r($_POST[$this->id]);
             echo "<br>";
             echo $meta_key;
             echo "<br>";
-            print_r($new_meta_value);
+            echo 'New meta: ' . $new_meta_value;
             echo "<br>";echo "<br>";
+            echo 'Old meta: ' . $meta_value;
+            echo "<br>";echo "<br>";
+            echo $new_meta_value && !$meta_value;
+            echo $new_meta_value && $new_meta_value != $meta_value;
+            echo (!$new_meta_value || empty($new_meta_value)) && $meta_value;
             err();
         }
 

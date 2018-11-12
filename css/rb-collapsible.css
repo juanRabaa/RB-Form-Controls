@@ -10,6 +10,7 @@
     width: 100%;
     background-color: transparent;
     border-bottom: 0;
+    box-sizing: border-box;
 }
 
 .rb-collapsible > .rb-collapsible-body {
