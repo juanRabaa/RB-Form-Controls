@@ -306,7 +306,22 @@ class RB_Images_Gallery_Control extends RB_Metabox_Control{
 
     public function render_content(){
         $attachments_ids_csv = $this->value;
-        $attachments_ids = $attachments_ids_csv ? str_getcsv($attachments_ids_csv) : array();
+        $attachments_ids = array();
+        //Se parsean csv para mantener compatibilidad con versiones anteriores
+        if($attachments_ids_csv){
+            $first_char = substr($attachments_ids_csv, 0, 1);
+            $isjson = $first_char == '{' || $first_char == '[';
+
+            if($isjson)
+                $attachments_ids = json_decode($attachments_ids_csv, true);
+            else
+                $attachments_ids = array_map(function( $att_id ){
+                    return array(
+                        'id'    => $att_id,
+                    );
+                }, str_getcsv($attachments_ids_csv));
+        }
+
         extract($this->settings);
         ?>
         <?php $this->print_control_header(); ?>
@@ -315,7 +330,8 @@ class RB_Images_Gallery_Control extends RB_Metabox_Control{
             <div class="rb-tax-images-boxes">
                 <?php
                 if ($attachments_ids):
-                    foreach($attachments_ids as $attachment_id ):
+                    foreach($attachments_ids as $attachment_data ):
+                        $attachment_id = $attachment_data['id'];
                         $attachment = $this->wp_get_attachment( $attachment_id );
                 ?>
                 <div class="rb-tax-image rb-gallery-box" rel="<?php echo $attachment_id; ?>" style="background-image: url(<?php echo $attachment['thumbnail']; ?>);">

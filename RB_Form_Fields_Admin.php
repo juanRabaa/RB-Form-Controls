@@ -29,6 +29,9 @@ if( is_admin() ){
 
         //Double list control
         wp_enqueue_script( 'rb-double-list-control', plugin_dir_url(__FILE__) . 'js/rb-double-list-control.js', array('jquery'), true );
+
+        //Font Aweasome
+        wp_enqueue_style( "fontawesome", 'https://use.fontawesome.com/releases/v5.4.1/css/all.css', true );
     }
     add_action( 'admin_enqueue_scripts', 'rb_form_fields_scripts' );
 

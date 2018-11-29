@@ -26,8 +26,8 @@
                 },
             });
         });
-        console.log(ctrSel.controlPanel + ' ' + ctrSel.addButton);
-        $(document).on('click', ctrSel.controlPanel + ' ' + ctrSel.addButton, function(){
+        //console.log(ctrSel.controlPanel + ' ' + ctrSel.addButton);
+        $(document).on('click', `${ctrSel.controlPanel} ${ctrSel.addButton}`, function(){
             var $controlPanel = getControlPanel($(this));
             console.log(234234);
             var rbMediaGalleryUploader = wp.media.frames.file_frame = wp.media({
@@ -46,7 +46,7 @@
                 if(!controlCanRepeatAttachments($controlPanel))
                     clearImagesHolder($controlPanel);
                 imagesArr.forEach( function( image, index ){
-                    addImage($controlPanel, image);
+                    insertImageBox($controlPanel, image);
                     //If last, add ids to set of values
                     if(index == imagesArr.length - 1){
                         updateControlValue($controlPanel);
@@ -70,6 +70,53 @@
 
             rbMediaGalleryUploader.open();
             console.log(rbMediaGalleryUploader);
+        });
+
+        function openImageChangePanel($controlPanel, index){
+            var rbMediaGalleryUploader = wp.media.frames.file_frame = wp.media({
+                title: 'Change image',
+                button: {
+                    text: 'Change image',
+                },
+                multiple: 'false',
+                type: 'image',//audio, video, application/pdf, ... etc
+            });
+
+            rbMediaGalleryUploader.off("select");
+            rbMediaGalleryUploader.on('select', function() {
+                var imagesArr = rbMediaGalleryUploader.state().get('selection').models;
+                console.log(imagesArr);
+                if(!controlCanRepeatAttachments($controlPanel))
+                    clearImagesHolder($controlPanel);
+
+                insertImageBox($controlPanel, imagesArr[0], index);
+                updateControlValue($controlPanel);
+            });
+
+            rbMediaGalleryUploader.off("open");
+            rbMediaGalleryUploader.on('open',function() {
+                var selection = rbMediaGalleryUploader.state().get('selection');
+                var id = getImageID($controlPanel, index);
+                console.log(id);
+                if(id){
+                    var attachment = wp.media.attachment(id);
+                    attachment.fetch();
+                    selection.add( attachment ? [ attachment ] : [] );
+                }
+            });
+
+            rbMediaGalleryUploader.open();
+            console.log(rbMediaGalleryUploader);
+        }
+
+        $(document).on('click', `${ctrSel.controlPanel} .rb-gallery-box:not(${ctrSel.addButton})`, function(event){
+            if( $(event.target).hasClass('rb-remove') )
+                return false;
+
+            var index = $(this).index();
+            var $controlPanel = getControlPanel($(this));
+            openImageChangePanel($controlPanel, index);
+            console.log(index);
         });
 
         $(document).on('click', ctrSel.controlPanel + ' ' + ctrSel.removeButton, function(){
@@ -146,14 +193,14 @@
                 return events.filterValue[0].handler;
             return null;
         }
+
+        function getImageID($controlPanel, index){
+            var $image = $controlPanel.find(`.rb-gallery-box:nth-child(${index + 1})`);
+            return $image.attr('rel');
+        }
         // =========================================================================
         // METHODS
         // =========================================================================
-        function addImage($controlPanel, image){
-            //console.log(image);
-            insertImageBox($controlPanel, image);
-        }
-
         function removeImage($controlPanel, $imageBox){
             removeImageBox($imageBox);
             updateControlValue($controlPanel);
@@ -176,17 +223,17 @@
             var $input = getControlValueInput($controlPanel);
             console.log($input);
             var items = $controlPanel.find(ctrSel.image);
-            var value = "";
+            var value = [];
             console.log("Current Items:", items);
             items.each(function(index){
-                if(index > 0)
-                    value += ',';
-                value += getImageItemId($(this));
+                value.push( {
+                    id: getImageItemId($(this)),
+                });
             });
             if(!controlCanRepeatAttachments($controlPanel))
-            console.log("New Value:", value);
+                console.log("New Value:", value);
             var data = {value: value, items: items};
-            var value = getFilteredValue($controlPanel, value, items);
+            var value = JSON.stringify( getFilteredValue($controlPanel, value, items) );
             return $input.val( value ).trigger('input');
         }
 
@@ -208,7 +255,7 @@
         // =========================================================================
         // GALLERY MARKUP
         // =========================================================================
-        function insertImageBox($controlPanel, image){
+        function insertImageBox($controlPanel, image, index){
             var $imgBoxesHolder = getImagesBoxesHolder($controlPanel);
 
             //Media info
@@ -222,9 +269,19 @@
                 +    '<i class="fas fa-times rb-remove"></i>'
                 +'</div>';
 
-            //Insert before the add new element control
-            $(stringElement).insertBefore( $imgBoxesHolder.children('.rb-tax-add') );
-            //$imgBoxesHolder.append( stringElement );
+            console.log('Index: ', index);
+            if( index >= 0){
+                //Replace image
+                var $image = $controlPanel.find(`.rb-gallery-box:nth-child(${index + 1})`);
+
+                if($image.length)
+                    $image.replaceWith(stringElement);
+            }
+            else{
+                //Insert before the add new element control
+                $(stringElement).insertBefore( $imgBoxesHolder.children('.rb-tax-add') );
+                //$imgBoxesHolder.append( stringElement );
+            }
         }
 
         function removeImageBox($imageBox){
