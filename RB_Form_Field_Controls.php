@@ -133,7 +133,7 @@ class RB_Input_Control extends RB_Metabox_Control{
         $checked_attr = $this->value ? 'checked' : '';
         ?>
         <label>
-           <input type="checkbox" rb-control-value name="<?php echo $this->id; ?>" value="<?php echo $this->value; ?>" <?php echo $checked_attr; ?>></input>
+           <input type="checkbox" rb-control-value name="<?php echo $this->id; ?>" <?php echo $checked_attr; ?>></input>
            <span><?php echo $this->settings['label']; ?></span>
         </label>
         <?php

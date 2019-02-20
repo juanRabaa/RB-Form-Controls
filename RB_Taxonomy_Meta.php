@@ -175,7 +175,7 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
         //If a single input control was used
         else{
             /* Get the posted data */
-            $new_meta_value = ( isset( $_POST[$this->id] ) ?  $_POST[$this->id] : ’ );
+            $new_meta_value = isset( $_POST[$this->id] ) ? $_POST[$this->id] : '';
         }
         /* Get the meta key. */
         $meta_key = $this->id;
@@ -183,12 +183,18 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
         /* Get the meta value of the custom field key. */
         $meta_value = get_term_meta( $term_id, $meta_key, true );
 
-        if( true  ){
+        if( $this->id == '_pd_alt_color'  ){
             print_r($_POST[$this->id]);
             echo "<br>";
             echo $meta_key;
             echo "<br>";
             print_r($new_meta_value);
+            if( isset($_POST[$meta_key]) ){
+                echo "<br>";
+                echo $_POST[$this->id];
+            }
+
+            //err();
         }
 
         /* If a new meta value was added and there was no previous value, add it. */
