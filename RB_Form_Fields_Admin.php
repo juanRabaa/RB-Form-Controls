@@ -37,7 +37,7 @@ if( is_admin() ){
 
     //CUSTOMIZER SCRIPTS
     function rb_customizer_scripts($wp_customize) {
-        wp_enqueue_script( 'jQuery', 'https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js', true );
+        //wp_enqueue_script( 'jQuery', 'https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js', true );
         wp_enqueue_script( 'rb-customizer-values-manager', plugin_dir_url(__FILE__) . 'js/customizerControlsValuesManager.js', array('jQuery'), true );
     }
     add_action( 'customize_controls_enqueue_scripts', 'rb_customizer_scripts' );
