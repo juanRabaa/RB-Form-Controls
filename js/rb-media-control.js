@@ -4,8 +4,10 @@
         $(document).on('click', '.input-wp-media-image-holder', function(e) {
             e.stopPropagation();
             e.preventDefault();
+            if(this.hasAttribute("media-open"))
+                return;
             var $button = $(this);
-			$button.attr('media-open');            
+			$button.attr('media-open', '');
             console.log( $(this));
             var $controlPanel = $(this).closest(".customize-control-multiple-inputs");
             var $input_field = $(this).find("input");
