@@ -61,8 +61,8 @@ class RB_Metabox extends RB_Form_Field_Controller{
                     $new_meta_value = json_decode($_POST[$this->id], true);
                 else
                     $new_meta_value = json_decode($_POST[$this->id], true);
-                echo "New value: "; print_r($_POST[$this->id]);
-                echo "<br>";
+                //echo "New value: "; print_r($_POST[$this->id]);
+                //echo "<br>";
             }
         }
         //If a group of inputs controls were used
