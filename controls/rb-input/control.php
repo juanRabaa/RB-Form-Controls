@@ -45,6 +45,7 @@ class RB_Input_Control extends RB_Metabox_Control{
     public function select_input(){
         switch($this->input_type){
             case 'text': $this->input_render = array($this, 'render_text_input'); break;
+            case 'textarea': $this->input_render = array($this, 'render_textarea_input'); break;
             case 'checkbox': $this->input_render = array($this, 'render_checkbox_input'); break;
             case 'number': $this->input_render = array($this, 'render_number_input'); break;
             case 'select': $this->input_render = array($this, 'render_select_input'); break;
@@ -55,6 +56,11 @@ class RB_Input_Control extends RB_Metabox_Control{
 
     public function render_text_input(){
         ?><input type="text" rb-control-value name="<?php echo $this->id; ?>" value="<?php echo $this->value; ?>"></input><?php
+    }
+
+    public function render_textarea_input(){
+        $rows = $this->rows ? esc_attr($this->rows) : 5;
+        ?><textarea type="textarea" rows="<?php echo $rows; ?>" rb-control-value name="<?php echo $this->id; ?>" value="<?php echo $this->value; ?>"></textarea><?php
     }
 
     public function render_number_input(){
