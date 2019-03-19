@@ -13,27 +13,26 @@ class RB_Form_Single_Field{
     public function __construct($id, $value, $control_settings, $type = 'RB_Input_Control', $settings = array()) {
         $this->id = $id;
         $this->value = $value;
-        // if( ($value === null) && is_array($control_settings) && isset($control_settings['default']) ){
-        //     $this->value = $control_settings['default'];
-        //     $this->default_value = $control_settings['default'];
-        // }
+        //var_dump($value);
+        if( ($value == null) && is_array($control_settings) && isset($control_settings['default']) ){
+            $this->value = $control_settings['default'];
+            $this->default_value = $control_settings['default'];
+        }
         $this->control_settings = $control_settings;
         $this->control_settings['id'] = $this->id;
         $this->type = $type;
-
         $this->settings = wp_parse_args($this->settings, $settings);
-
+        $this->generate_renderer();
     }
 
     public function render(){
-        if( class_exists($this->type) && method_exists($this->type, 'render_content') ){
+        if( $this->renderer ){
             ?>
             <div class="rb-form-control-single-field rb-form-control">
                 <div class="rb-collapsible-body control-content">
                 <?php
                 $this->print_action_controls();
-                $renderer = new $this->type( $this->value, $this->control_settings);
-                $renderer->print_control();
+                $this->renderer->print_control();
                 ?>
                 </div>
             </div>
@@ -63,6 +62,14 @@ class RB_Form_Single_Field{
             </div>
         <?php
         endif;
+    }
+
+    //Saves in $this->renderer the object that renders the control
+    public function generate_renderer(){
+        if(class_exists($this->type) && method_exists($this->type, 'render_content'))
+            $this->renderer = new $this->type( $this->value, $this->control_settings);
+        else
+            $this->renderer = null;
     }
 }
 
@@ -407,6 +414,7 @@ class RB_Form_Field_Controller{
 
     //Renders the controller accordingly to the settings passed
     public function render(){
+        $this->generate_control();
         $title = $this->get_setting('title');
         $description = $this->get_setting('description');
         $is_collapsible = $this->get_setting('collapsible');
@@ -433,18 +441,10 @@ class RB_Form_Field_Controller{
                 </div>
                 <div class="rb-form-field-controller-control">
                 <?php
-                if( $this->is_repeater() ){
-                    $this->render_repeater();
-                }
-                else{
-                    if( $this->render_nonce )
+                    if( !$this->is_repeater() && $this->render_nonce )
                         wp_nonce_field( basename( __FILE__ ), $this->id . '_nonce' );
 
-                    if($this->is_group())
-                        $this->render_group();
-                    else
-                        $this->render_single();
-                }
+                    $this->rb_control_field->render();
                 ?>
                 </div>
             </div>
@@ -452,38 +452,36 @@ class RB_Form_Field_Controller{
         <?php
     }
 
-    //Render the control when only one was provided
-    public function render_single($args = array()){
-        $control_settings = is_array($this->controls) ? reset($this->controls) : array();//First item in the controls array
-        $control_settings['id'] = $control_id;
-        $control_type = $control_settings['type'] ? $control_settings['type'] : 'RB_Input_Control';
-        $single_field = new RB_Form_Single_Field($this->id, $this->value, $control_settings, $control_type);
-        $single_field->render();
-    }
-
-    //Renders the controls in the controls array
-    public function render_group($args = array()){
-        if( is_array($this->settings['controls']) ){
-            $group_settings = is_array($args['group_settings']) ? $args['group_settings'] : array();
-            $group = new RB_Form_Group_Field($this->id, $this->value, $this->settings['controls'], $group_settings);
-            $group->render();
+    public function generate_control($args = array()){
+        /*Generate a repeater*/
+        if($this->is_repeater()){
+            $repeater_settings = is_array($this->settings['repeater']) ? $this->settings['repeater'] : array();
+            $this->rb_control_field = new RB_Form_Repeater_Field($this->id, $this->value, $this->controls, $items_settings = array(
+                'collapsible'   => true,
+            ), $repeater_settings);
+        }
+        //Renders the controls in the controls array
+        else if( $this->is_group() ){
+            if( is_array($this->settings['controls']) ){
+                $group_settings = is_array($args['group_settings']) ? $args['group_settings'] : array();
+                $this->rb_control_field = new RB_Form_Group_Field($this->id, $this->value, $this->settings['controls'], $group_settings);
+            }
+        }
+        //Generates the controler when only one control was provided
+        else{
+            $control_settings = is_array($this->controls) ? reset($this->controls) : array();//First item in the controls array
+            $control_settings['id'] = $control_id;
+            $control_type = $control_settings['type'] ? $control_settings['type'] : 'RB_Input_Control';
+            $this->rb_control_field = new RB_Form_Single_Field($this->id, $this->value, $control_settings, $control_type);
         }
     }
 
-    //Renders a repeater of controls
-    public function render_repeater($args = array()){
-        $repeater_settings = is_array($this->settings['repeater']) ? $this->settings['repeater'] : array();
-        $repeater = new RB_Form_Repeater_Field($this->id, $this->value, $this->controls, $items_settings = array(
-            'collapsible'   => true,
-        ), $repeater_settings);
-
-        $repeater->render();
-    }
-
     public function get_sanitazed_value($value){
+        $isset_value = isset($value);
+
         if( $this->is_repeater() ){
             $sanitized_value = array();
-            if( isset($value) ){
+            if( $isset_value ){
                 if( $this->is_group() )
                     $sanitized_value = json_decode($value, true);
                 else
@@ -493,13 +491,21 @@ class RB_Form_Field_Controller{
         //If a group of inputs controls were used
         else if( $this->is_group() ){
             $sanitized_value = array();
-            if( isset($value) )
+            if( $isset_value )
                 $sanitized_value = json_decode($value, true);
         }
         //If a single input control was used
         else{
             /* Get the posted data */
-            $sanitized_value = $value;
+            if($this->rb_control_field->renderer->strict_type == 'bool')
+                $sanitized_value = $isset_value ? true : false;
+            else
+                $sanitized_value = $isset_value ? $value : null;
+            // if($this->id == 'gg_prod_cat_show_title'){
+            //     var_dump($this->rb_control_field);
+            //     var_dump($sanitized_value);
+            //     eerrere();
+            // }
         }
 
         return $sanitized_value;

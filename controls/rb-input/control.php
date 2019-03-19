@@ -7,6 +7,12 @@ class RB_Input_Control extends RB_Metabox_Control{
     public $input_type;
     public $choices;
 
+    public function __construct($value, $settings) {
+        parent::__construct($value, $settings);
+        if( $this->settings['input_type'] == 'checkbox' )
+            $this->strict_type = 'bool';
+    }
+
     public function render_content(){
         extract($this->settings);
         $this->value = esc_attr($this->value);
@@ -56,11 +62,13 @@ class RB_Input_Control extends RB_Metabox_Control{
     }
 
     public function render_checkbox_input(){
+        $this->sanitaze_checkbox_value();
         $checked_attr = $this->value ? 'checked' : '';
         ?>
         <label>
-           <input type="checkbox" rb-control-value name="<?php echo $this->id; ?>" <?php echo $checked_attr; ?>></input>
-           <span><?php echo $this->settings['label']; ?></span>
+            <input type="hidden" rb-control-value name="<?php echo $this->id; ?>" value="<?php echo $this->value; ?>">
+            <input type="checkbox" <?php echo $checked_attr; ?> onclick="this.previousElementSibling.value=1-this.previousElementSibling.value">
+            <span><?php echo $this->settings['label']; ?></span>
         </label>
         <?php
     }
@@ -90,5 +98,12 @@ class RB_Input_Control extends RB_Metabox_Control{
         else:?>
         <p>No choices were given for the selection control</p>
         <?php endif;
+    }
+
+    public function sanitaze_checkbox_value(){
+        if( !isset($this->value) || $this->value == '' || $this->value == 'false' || $this->value == '0' )
+            $this->value = false;
+        else
+            $this->value = true;
     }
 }

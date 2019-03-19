@@ -42,7 +42,6 @@ class RB_Customizer_Field_Control extends WP_Customize_Control{
         //print_r("customize_sanitize_$this->id");
         add_action( "customize_sanitize_$this->id", function($value) {
             $new_meta_value = $this->controller->get_sanitazed_value($value);
-            //erer($new_meta_value);
             return $new_meta_value;
         });
     }

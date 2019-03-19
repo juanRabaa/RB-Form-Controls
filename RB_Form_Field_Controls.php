@@ -13,6 +13,8 @@ abstract class RB_Metabox_Control{
     public $id;
     public $value;
     public $settings;
+    //Forces the control value to be of a certain type
+    public $strict_type;
 
     public function __construct($value, $settings) {
         $this->value = $value;

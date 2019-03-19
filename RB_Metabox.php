@@ -60,6 +60,7 @@ class RB_Metabox extends RB_Form_Field_Controller{
         $meta_key = $this->meta_id;
 
         /* Get the meta value of the custom field key. */
+        $meta_exists = $this->meta_exists($post_id);
         $meta_value = get_post_meta( $post_id, $meta_key, true );
 
         if( $this->id == 'sdfsdfsdfsf' ){
@@ -77,16 +78,17 @@ class RB_Metabox extends RB_Form_Field_Controller{
             err();
         }
 
-        /* If a new meta value was added and there was no previous value, add it. */
-        if ( $new_meta_value && !$meta_value )
-            add_post_meta( $post_id, $meta_key, $new_meta_value, true );
-
-        /* If the new meta value does not match the old value, update it. */
-        elseif ( $new_meta_value && $new_meta_value != $meta_value )
-            update_post_meta( $post_id, $meta_key, $new_meta_value );
-
+        // If the new value is not null
+        if( isset($new_meta_value) ){
+            /* If a new meta value was added and there was no previous value, add it. */
+            if( !$meta_exists )
+                add_post_meta( $post_id, $meta_key, $new_meta_value, true );
+            /* If the new meta value does not match the old value, update it. */
+            else if( $new_meta_value != $meta_value )
+                update_post_meta( $post_id, $meta_key, $new_meta_value );
+        }
         /* If there is no new meta value but an old value exists, delete it. */
-        elseif ( (!$new_meta_value || empty($new_meta_value)) && $meta_value )
+        else if ( $meta_exists )
             delete_post_meta( $post_id, $meta_key, $meta_value );
 
     }
@@ -109,5 +111,9 @@ class RB_Metabox extends RB_Form_Field_Controller{
                 return $classes;
             });
         }
+    }
+
+    protected function meta_exists($post_id){
+        return metadata_exists( 'post', $post_id, $this->id );
     }
 }
