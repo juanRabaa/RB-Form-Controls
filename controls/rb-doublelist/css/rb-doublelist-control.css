@@ -75,10 +75,13 @@
     top: 0;
     right: 0;
     background-color: #fec118;
-    height: 2.2rem;
+    height: 4.2rem;
     width:  2rem;
     cursor: pointer;
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .rb-double-list-control .item .delete-button > span {
@@ -104,4 +107,8 @@
     border: dashed 0.1rem #fec118;
     height: 2rem;
     visibility: visible!important;
+}
+
+.rb-double-list-control .items{
+    margin-left: 0;
 }

@@ -8,19 +8,28 @@
 .rb-collapsible > .rb-collapsible-header {
     cursor:  pointer;
     width: 100%;
-    background-color: transparent;
+    background-color: #ffffff;
+    color: #ffffff;
     border-bottom: 0;
     box-sizing: border-box;
+    padding: 1rem 0.5rem;
+    transition: all 0.3s;
+    border: solid 1px grey;
 }
 
 .rb-collapsible > .rb-collapsible-body {
     display: none;
-    padding-top:  1rem;
+    padding: 1.5rem 1rem;
     overflow: auto;
+    border: solid 1px grey;
+    border-top: 0;
+    background-color: rgb(255, 255, 255);
 }
 
 .rb-collapsible.active > .rb-collapsible-body {
     display: block;
+    /* border: solid 1px grey; */
+    border-top: 0;
 }
 
 .rb-collapsible.active > .rb-collapsible-header .button > i, .rb-collapsible.opening > .rb-collapsible-header .button > i {
@@ -37,10 +46,12 @@
 
 .rb-collapsible{
     transition: box-shadow 0.3s;
+    /* border: solid 1px rgb(85, 93, 102); */
 }
 
 .rb-collapsible.active {
-    box-shadow: -3px 7px 20px 0px #00000082;
+    box-shadow: 2px 7px 5px 0px #00000082;
     position: relative;
     z-index: 1;
+    border-width: 0;
 }

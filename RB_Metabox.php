@@ -53,30 +53,9 @@ class RB_Metabox extends RB_Form_Field_Controller{
         $_POST = array_map( 'stripslashes_deep', $_POST );
 
         $new_meta_value = null;
+        if(isset($_POST[$this->id]))
+            $new_meta_value = $this->get_sanitazed_value($_POST[$this->id]);
 
-        if( $this->is_repeater() ){
-            $new_meta_value = array();
-            if( isset($_POST[$this->id]) ){
-                if( $this->is_group() )
-                    $new_meta_value = json_decode($_POST[$this->id], true);
-                else
-                    $new_meta_value = json_decode($_POST[$this->id], true);
-                //echo "New value: "; print_r($_POST[$this->id]);
-                //echo "<br>";
-            }
-        }
-        //If a group of inputs controls were used
-        else if( $this->is_group() ){
-            //print_r( "Group json: " . $_POST[$this->id]); echo "<br>";
-            $new_meta_value = array();
-            if( isset($_POST[$this->id]) )
-                $new_meta_value = json_decode($_POST[$this->id], true);
-        }
-        //If a single input control was used
-        else{
-            /* Get the posted data */
-            $new_meta_value = ( isset( $_POST[$this->id] ) ?  $_POST[$this->id] : '' );
-        }
         /* Get the meta key. */
         $meta_key = $this->meta_id;
 

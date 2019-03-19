@@ -58,6 +58,8 @@
             var newValue = this.getValue($panel);
             var $valInput = this.getValueInput($panel);
             $valInput.val(newValue).trigger('change');
+            if( fieldsController.isCustomizerControl($panel) )
+                fieldsController.updateCustomizer($panel, newValue);
         },
         isGroupRepeater: function($panel){
             return $panel.attr('data-type') == 'group';
@@ -261,6 +263,8 @@
             var newValue = this.getValue($panel);
             var $valInput = this.getValueInput($panel);
             $valInput.val(newValue).trigger('change');
+            if( fieldsController.isCustomizerControl($panel) )
+                fieldsController.updateCustomizer($panel, newValue);
         },
         isGroup: function($panel){
             return $panel.hasClass('rb-form-control-field-group');
@@ -268,7 +272,6 @@
         getGroupBaseID: function($panel){
             return $panel.attr('data-id');
         },
-
     }
 
     // =========================================================================
@@ -289,15 +292,48 @@
         isSingle: function($panel){
             return $panel.hasClass('rb-form-control-single-field');
         },
+        isTopLevel: function($panel){
+            return ( $panel.closest('.rb-form-control-field-group').length == 0 && $panel.closest('.rb-form-control-repeater').length == 0 );
+        }
     }
 
+    // =============================================================================
+    // GENERAL METHODS
+    // =============================================================================
+    var fieldsController =  {
+        updateCustomizer: function($panel, value){
+            if( !($customizerPanel = this.isCustomizerControl($panel)) )
+                return;
 
+            let $valueInput = $customizerPanel.children('[rb-customizer-control-value]');
+            //console.log($valueInput, value);
+            if( $valueInput.length )
+                $valueInput.val(value).trigger('change');
+        },
+        isCustomizerControl: function($panel){
+            return this.isTopLevel($panel) && $panel.closest('.rb-customizer-control') ? $panel.closest('.rb-customizer-control') : false;
+        },
+        isTopLevel: function($panel){
+            return ( $panel.parent().closest('.rb-form-control-field-group').length == 0 && $panel.parent().closest('.rb-form-control-repeater').length == 0 );
+        },
+    }
     // =========================================================================
     // EVENTS
     // =========================================================================
 
 
     $(document).ready(function(){
+
+        // =============================================================================
+        // CUSTOMIZER SINGLE VALUE UPDATE
+        // =============================================================================
+        $(document).on('input change', '.rb-customizer-control [rb-control-value]', function(){
+            $panel = $(this).closest('.rb-form-control-single-field');
+            //console.log($(this));
+            if($panel.length != 0){
+                fieldsController.updateCustomizer($panel, singleType.getValue($panel));
+            }
+        });
 
         // =============================================================================
         // GROUP VALUE UPDATE
@@ -321,7 +357,7 @@
         });
         //When it is a single input repeater
         $(document).on('change input', '.rb-form-control-repeater [rb-control-value]', function(){
-            console.log('update single value');
+            //console.log('update single value');
             var $panel = $(this).closest('.rb-form-control-repeater');
             var isGroupRepeater = repeaterType.isGroupRepeater($panel);
 
@@ -347,10 +383,13 @@
 
         });
 
-        $('.rb-form-control-repeater[data-title-link]').each(function(){
-            var $panel = $(this).closest('.rb-form-control-repeater');
-            repeaterType.updateControlsTitle($panel);
-        });
+        setTimeout(function(){
+            $('.rb-form-control-repeater[data-title-link]').each(function(){
+                var $panel = $(this).closest('.rb-form-control-repeater');
+                repeaterType.updateControlsTitle($panel);
+            });
+        }, 0);
+
 
         // =====================================================================
         // ADD ITEM
@@ -378,15 +417,31 @@
         // =====================================================================
         // SORTING
         // =====================================================================
-        $( ".rb-form-control-repeater .controls" ).sortable({
-            update: function(ev, ui){
-                var $panel = ui.item.closest('.rb-form-control-repeater');
-                repeaterType.updateValue($panel);
-                repeaterType.updateControlsIds($panel);
-                repeaterType.updateControlsTitle($panel);
-            },
-        });
 
+        //It doesnt works on customizer if not pushed out of the regular flow with timeout
+        setTimeout(function(){
+            $( ".rb-form-control-repeater .controls" ).sortable({
+                revert: 100,
+                refreshPositions: true,
+                scroll: true,
+                forcePlaceholderSize: true,
+                //handle: ".rb-collapsible-header",
+                update: function(ev, ui){
+                    let $panel = ui.item.closest('.rb-form-control-repeater');
+                    repeaterType.updateValue($panel);
+                    repeaterType.updateControlsIds($panel);
+                    repeaterType.updateControlsTitle($panel);
+                },
+                start: function( event, ui ) {
+                    ui.placeholder.height(ui.helper.outerHeight());
+                    // if( RBCollapsibleMaster.collapsibleIsOpen(ui.item) )
+                    //     RBCollapsibleMaster.closeCollapsible(ui.item);
+                },
+                sort: function( event, ui ) {
+                    //ui.placeholder.height(ui.helper.outerHeight());
+                }
+            });
+        }, 0);
     });
 
 

@@ -1,40 +1,48 @@
- (function($){ 
+(function($){
+    class RBCollapsibleMaster{
+        constructor(){
 
-    $(document).ready(function(){
-        function collapsibleIsOpen($collapsible){
+        }
+
+        static isCollapsible($collapsible){
+            return $collapsible.hasClass('rb-collapsible');
+        }
+
+        static collapsibleIsOpen($collapsible){
             return $collapsible.hasClass('active');
         }
 
-        function animationStarts($collapsible){
+        static animationStarts($collapsible){
             $collapsible.addClass('animating');
         }
 
-        function animationOver($collapsible){
+        static animationOver($collapsible){
             $collapsible.removeClass('animating');
         }
 
-        function closeCollapsible($collapsible){
+        static closeCollapsible($collapsible, time){
             var $body = $collapsible.children('.rb-collapsible-body');
+            var time = time ? time : 200;
 
-            animationStarts($collapsible)
-            $body.stop().slideUp(200, function(){
+            RBCollapsibleMaster.animationStarts($collapsible)
+            $body.stop().slideUp(time, function(){
                 $collapsible.removeClass('active');
                 $collapsible.removeClass('animating');
             });
         }
 
-        function openCollapsible($collapsible){
+        static openCollapsible($collapsible){
             var $body = $collapsible.children('.rb-collapsible-body');
 
             $collapsible.addClass('opening');
-            animationStarts($collapsible);
+            RBCollapsibleMaster.animationStarts($collapsible);
             $body.stop().slideDown({
                 duration: 200,
                 start: function () {
-                    $(this).css('display', 'flex');
+                    $(this).css('display', 'block');
                 },
                 complete: function () {
-                    animationOver($collapsible);
+                    RBCollapsibleMaster.animationOver($collapsible);
                     $collapsible.removeClass('opening');
                     $collapsible.addClass('active');
                     $body.height('auto');
@@ -42,34 +50,35 @@
             });
         }
 
-        function toggleCollapsible($collapsible){
-            if( collapsibleIsOpen($collapsible) )
-                closeCollapsible($collapsible);
+        static toggleCollapsible($collapsible){
+            if( RBCollapsibleMaster.collapsibleIsOpen($collapsible) )
+                RBCollapsibleMaster.closeCollapsible($collapsible);
             else
-                openCollapsible($collapsible);
+                RBCollapsibleMaster.openCollapsible($collapsible);
         }
 
-        function activateAccordion($accordion, $collapsible){
+        static activateAccordion($accordion, $collapsible){
+            //console.log($accordion, $collapsible)
             if( !$collapsible.hasClass('animating') ){
                 var $siblings = $collapsible.siblings('.rb-collapsible');
                 if( !$siblings.hasClass('animating')){
-                    toggleCollapsible($collapsible);
+                    RBCollapsibleMaster.toggleCollapsible($collapsible);
                     $siblings.each(function(){
-                        if( collapsibleIsOpen($(this)) )
-                            closeCollapsible($(this));
+                        if( RBCollapsibleMaster.collapsibleIsOpen($(this)) )
+                            RBCollapsibleMaster.closeCollapsible($(this));
                     });
                 }
             }
         }
+    }
+    window.RBCollapsibleMaster = RBCollapsibleMaster;
 
-        $(document).on('click', '.rb-collapsible .rb-collapsible-header', function(){
-            var $collapsible = $(this).closest('.rb-collapsible');
-            var $accordion = $collapsible.parent('[data-rb-accordion]');
-            if($accordion.length > 0)
-                activateAccordion($accordion, $collapsible);
-            else
-                toggleCollapsible($collapsible);
-        })
+    $(document).on('click', '.rb-collapsible .rb-collapsible-header', function(){
+        var $collapsible = $(this).closest('.rb-collapsible');
+        var $accordion = $collapsible.parent('[data-rb-accordion]');
+        if($accordion.length > 0)
+            RBCollapsibleMaster.activateAccordion($accordion, $collapsible);
+        else
+            RBCollapsibleMaster.toggleCollapsible($collapsible);
     });
-
 })(jQuery);

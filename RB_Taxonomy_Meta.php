@@ -46,7 +46,7 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
     // ADD AND EDIT FORM ACTIONS
     // =========================================================================
     protected function add_form_actions(){
-        foreach( $this->terms as $term_slug){
+        foreach( $this->terms as $term_slug ){
             add_action( $term_slug . "_edit_form_fields", array($this, 'term_edit_form_fields_row') );
             if( $this->add_form )
                 add_action( $term_slug . "_add_form_fields", array($this, 'term_add_form_fields_container') );
@@ -154,59 +154,40 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
         $_POST = array_map( 'stripslashes_deep', $_POST );
 
         $new_meta_value = null;
+        if(isset($_POST[$this->id]))
+            $new_meta_value = $this->get_sanitazed_value($_POST[$this->id]);
 
-        if( $this->is_repeater() ){
-            $new_meta_value = array();
-            if( isset($_POST[$this->id]) ){
-                if( $this->is_group() )
-                    $new_meta_value = json_decode($_POST[$this->id], true);
-                else
-                    $new_meta_value = json_decode($_POST[$this->id], true);
-                echo "New value: "; print_r($_POST[$this->id]);
-                echo "<br>";
-            }
-        }
-        //If a group of inputs controls were used
-        else if( $this->is_group() ){
-            $new_meta_value = array();
-            if( isset($_POST[$this->id]) )
-                $new_meta_value = json_decode($_POST[$this->id], true);
-        }
-        //If a single input control was used
-        else{
-            /* Get the posted data */
-            $new_meta_value = isset( $_POST[$this->id] ) ? $_POST[$this->id] : '';
-        }
         /* Get the meta key. */
         $meta_key = $this->id;
 
         /* Get the meta value of the custom field key. */
+        $meta_exists = $this->meta_exists($term_id);
         $meta_value = get_term_meta( $term_id, $meta_key, true );
 
-        if( $this->id == '_pd_alt_color'  ){
-            print_r($_POST[$this->id]);
+        if( $this->id == 'gg_prod_cat_show_title'  ){
+            var_dump($_POST[$this->id]);
             echo "<br>";
             echo $meta_key;
             echo "<br>";
-            print_r($new_meta_value);
-            if( isset($_POST[$meta_key]) ){
-                echo "<br>";
-                echo $_POST[$this->id];
-            }
-
+            var_dump($new_meta_value);
+            echo "<br>";
+            var_dump($meta_value);
+            echo "<br>";
+            var_dump($new_meta_value != $meta_value);
             //err();
         }
 
-        /* If a new meta value was added and there was no previous value, add it. */
-        if ( $new_meta_value && !$meta_value )
-            add_term_meta( $term_id, $meta_key, $new_meta_value, true );
-
-        /* If the new meta value does not match the old value, update it. */
-        elseif ( $new_meta_value && $new_meta_value != $meta_value )
-            update_term_meta( $term_id, $meta_key, $new_meta_value );
-
+        // If the new value is not null
+        if( isset($new_meta_value) ){
+            /* If a new meta value was added and there was no previous value, add it. */
+            if( !$meta_exists )
+                add_term_meta( $term_id, $meta_key, $new_meta_value, true );
+            /* If the new meta value does not match the old value, update it. */
+            else if( $new_meta_value != $meta_value )
+                update_term_meta( $term_id, $meta_key, $new_meta_value );
+        }
         /* If there is no new meta value but an old value exists, delete it. */
-        elseif ( (!$new_meta_value || empty($new_meta_value)) && $meta_value )
+        else if ( $meta_exists )
             delete_term_meta( $term_id, $meta_key, $meta_value );
 
     }
@@ -219,7 +200,12 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
             $term_id = $term->term_id;
         else
             $term_id = $term;
-        $this->value = get_term_meta($term_id, $this->id, true);
+        if( $this->meta_exists($term_id) )
+            $this->value = get_term_meta($term_id, $this->id, true);
+    }
+
+    protected function meta_exists($term_id){
+        return metadata_exists( 'term', $term_id, $this->id );
     }
 
     // =========================================================================
