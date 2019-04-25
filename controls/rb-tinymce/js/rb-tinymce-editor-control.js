@@ -4,6 +4,7 @@
 			buttons:"strong,em,link,ul,ol,li,aligncenter"
 		},
 		tinymce: {
+            height: '200',
 			branding:false,
 			browser_spellcheck:true,
 			cache_suffix:"wp-mce-4607-20180123",
@@ -126,7 +127,7 @@
             tinymce.on('init', function(args) {
                 //Add rb attribute to link to controller
                 rbEditorManager.getEditorHiddenInput(tinymce).attr('rb-control-value', '');
-                console.log(tinymce, controlContent);
+                //console.log(tinymce, controlContent);
                 tinymce.setContent( controlContent );
             });
             tinymce.on("change KeyDown KeyUp", function(data) {
@@ -136,15 +137,28 @@
         },
     };
 
-    $(document).on('click', '.rb-tinymce-control .editor-open-button', function(){
-        $panel = $(this).closest('.rb-tinymce-control');
+    function openPanelTinyMCE($panel){
         rbTinymceEditor.removeEditor( rbTinymceEditor.getPanelEditorID($panel) );
         rbTinymceEditor.loadEditor($panel);
+    }
+
+    $(document).on('click', '.rb-tinymce-control .editor-open-button', function(){
+        $panel = $(this).closest('.rb-tinymce-control');
+        openPanelTinyMCE($panel);
     });
 
     $(document).on('click', '.rb-tinymce-control .media-button', function(){
         $panel = $(this).closest('.rb-tinymce-control');
         rbTinymceEditor.openPanelMediaUploader($panel);
     });
+
+    var tinymceCheckInterval = setInterval(function(){
+        if(typeof tinyMCE !== 'undefined'){
+            $('.rb-tinymce-control').each(function(){
+                openPanelTinyMCE($(this));
+            });
+            clearInterval(tinymceCheckInterval);
+        }
+    }, 10);
 
 })(jQuery);

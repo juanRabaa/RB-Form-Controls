@@ -2,6 +2,13 @@
 
 class RB_Images_Gallery_Control extends RB_Metabox_Control{
 
+    public function __construct($value, $settings) {
+         parent::__construct($value, $settings);
+         $this->settings = wp_parse_args( $settings, array(
+             'repeatable'    => true,
+         ) );
+    }
+
     public function wp_get_attachment($attachment_id){
         $attachment = get_post( $attachment_id );
 		return array(
@@ -39,7 +46,7 @@ class RB_Images_Gallery_Control extends RB_Metabox_Control{
         extract($this->settings);
         ?>
         <?php $this->print_control_header(); ?>
-        <div class="rb-tax-images rb-tax-images-control">
+        <div class="rb-images-gallery-control rb-tax-images rb-tax-images-control" <?php $this->repeatable_attr(); ?>>
             <input rb-control-value class="rb-tax-value"  name="<?php echo $id; ?>" type="hidden" value="<?php echo esc_attr($attachments_ids_csv); ?>"></input>
             <div class="rb-tax-images-boxes">
                 <?php
@@ -61,5 +68,10 @@ class RB_Images_Gallery_Control extends RB_Metabox_Control{
             </div>
         </div>
         <?php
+    }
+
+    public function repeatable_attr(){
+        if( !$this->settings['repeatable'] )
+            print_r("data-unique=''");
     }
 }

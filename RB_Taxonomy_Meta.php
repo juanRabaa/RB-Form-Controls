@@ -29,6 +29,7 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
 
     public function __construct($id, $metabox_settings, $control_settings) {
         $this->metabox_settings = wp_parse_args($metabox_settings, $this->metabox_settings);
+        $this->add_form = $this->metabox_settings['add_form'];
         $this->terms = $this->metabox_settings['terms'];
         parent::__construct($id, null, $control_settings);
         $this->register_form_field();

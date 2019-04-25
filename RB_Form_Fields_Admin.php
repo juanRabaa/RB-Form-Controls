@@ -34,13 +34,14 @@ if( is_admin() ){
     //ADMIN SCRIPTS
     function rb_form_fields_scripts() {
         $screen = get_current_screen();
-        if( $screen && $screen->taxonomy )
-            wp_enqueue_script( 'jQuery', 'https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js', false );
-
+        if( $screen && $screen->taxonomy ){
+            wp_enqueue_script( 'jquery', 'https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js', false );
+            wp_enqueue_editor();
+        }
         // =====================================================================
         // COMMONS
         // =====================================================================
-        
+
         //Collapsibles
         wp_enqueue_style( 'rb-collapsible', plugin_dir_url(__FILE__) . 'css/rb-collapsible.css' );
         wp_enqueue_script( 'rb-collapsible', plugin_dir_url(__FILE__) . 'js/rb-collapsible.js', array('jquery'), true );

@@ -1,7 +1,7 @@
 .rb-tinymce-control{
     position: relative;
     min-height: 6rem;
-    z-index: 11;
+    z-index: 99999;
 }
 
 .rb-tinymce-control .editor-placeholder {

@@ -1,7 +1,7 @@
 ( function($){
     setTimeout(function(){
         var ctrSel = {
-            controlPanel: '.rb-wp-control',
+            controlPanel: '.rb-images-gallery-control',
             addButton:  '.rb-tax-add',
             removeButton: '.rb-remove',
             imagesHolder: '.rb-tax-images',
@@ -29,7 +29,7 @@
         //console.log(ctrSel.controlPanel + ' ' + ctrSel.addButton);
         $(document).on('click', `${ctrSel.controlPanel} ${ctrSel.addButton}`, function(){
             var $controlPanel = getControlPanel($(this));
-            console.log(234234);
+            //console.log(234234);
             var rbMediaGalleryUploader = wp.media.frames.file_frame = wp.media({
                 title: 'Add images',
                 button: {
@@ -42,7 +42,7 @@
             rbMediaGalleryUploader.off("select");
             rbMediaGalleryUploader.on('select', function() {
                 var imagesArr = rbMediaGalleryUploader.state().get('selection').models;
-                console.log(imagesArr);
+                //console.log(imagesArr);
                 if(!controlCanRepeatAttachments($controlPanel))
                     clearImagesHolder($controlPanel);
                 imagesArr.forEach( function( image, index ){
@@ -58,7 +58,7 @@
             rbMediaGalleryUploader.on('open',function() {
                 var selection = rbMediaGalleryUploader.state().get('selection');
                 var ids = getCurrentImagesIds($controlPanel);
-                console.log(ids);
+                //console.log(ids);
                 if(ids && !controlCanRepeatAttachments($controlPanel)){
                     ids.forEach(function(id) {
                         attachment = wp.media.attachment(id);
@@ -69,7 +69,7 @@
             });
 
             rbMediaGalleryUploader.open();
-            console.log(rbMediaGalleryUploader);
+            //console.log(rbMediaGalleryUploader);
         });
 
         function openImageChangePanel($controlPanel, index){
@@ -85,7 +85,7 @@
             rbMediaGalleryUploader.off("select");
             rbMediaGalleryUploader.on('select', function() {
                 var imagesArr = rbMediaGalleryUploader.state().get('selection').models;
-                console.log(imagesArr);
+                //console.log(imagesArr);
                 if(!controlCanRepeatAttachments($controlPanel))
                     clearImagesHolder($controlPanel);
 
@@ -97,7 +97,7 @@
             rbMediaGalleryUploader.on('open',function() {
                 var selection = rbMediaGalleryUploader.state().get('selection');
                 var id = getImageID($controlPanel, index);
-                console.log(id);
+                //console.log(id);
                 if(id){
                     var attachment = wp.media.attachment(id);
                     attachment.fetch();
@@ -106,7 +106,7 @@
             });
 
             rbMediaGalleryUploader.open();
-            console.log(rbMediaGalleryUploader);
+            //console.log(rbMediaGalleryUploader);
         }
 
         $(document).on('click', `${ctrSel.controlPanel} .rb-gallery-box:not(${ctrSel.addButton})`, function(event){
@@ -116,12 +116,12 @@
             var index = $(this).index();
             var $controlPanel = getControlPanel($(this));
             openImageChangePanel($controlPanel, index);
-            console.log(index);
+            //console.log(index);
         });
 
         $(document).on('click', ctrSel.controlPanel + ' ' + ctrSel.removeButton, function(){
             var $controlPanel = getControlPanel($(this));
-            console.log($controlPanel);
+            //console.log($controlPanel);
             removeImage($controlPanel, $(this).closest(ctrSel.image) );
         });
         // =========================================================================
@@ -129,7 +129,7 @@
         // =========================================================================
         function getImageInfo(media){
             var attr = media.attributes;
-            console.log(attr);
+            //console.log(attr);
             if(attr){
                 var info = {
                     id: attr.id,
@@ -183,7 +183,7 @@
         }
 
         function getControlValueInput($controlPanel){
-            console.log($controlPanel);
+            //console.log($controlPanel);
             return $controlPanel.find(ctrSel.controlValueInput);
         }
 
@@ -207,6 +207,7 @@
         }
 
         function controlCanRepeatAttachments($controlPanel){
+            //console.log($controlPanel[0]);
             return !$controlPanel[0].hasAttribute(ctrSel.unique);
         }
 
@@ -219,19 +220,19 @@
         }
 
         function updateControlValue($controlPanel){
-            console.log("Updating value");
+            //console.log("Updating value");
             var $input = getControlValueInput($controlPanel);
-            console.log($input);
+            //console.log($input);
             var items = $controlPanel.find(ctrSel.image);
             var value = [];
-            console.log("Current Items:", items);
+            //console.log("Current Items:", items);
             items.each(function(index){
                 value.push( {
                     id: getImageItemId($(this)),
                 });
             });
-            if(!controlCanRepeatAttachments($controlPanel))
-                console.log("New Value:", value);
+            // if(!controlCanRepeatAttachments($controlPanel))
+            //     console.log("New Value:", value);
             var data = {value: value, items: items};
             var value = JSON.stringify( getFilteredValue($controlPanel, value, items) );
             return $input.val( value ).trigger('input');
@@ -269,7 +270,7 @@
                 +    '<i class="fas fa-times rb-remove"></i>'
                 +'</div>';
 
-            console.log('Index: ', index);
+            //console.log('Index: ', index);
             if( index >= 0){
                 //Replace image
                 var $image = $controlPanel.find(`.rb-gallery-box:nth-child(${index + 1})`);
