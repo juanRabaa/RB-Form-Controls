@@ -5,8 +5,7 @@ class RB_tinymce_control extends RB_Metabox_Control{
     public function render_content(){
         extract($this->settings);
         if( $label ): ?>
-        <label for="<?php echo "asdasd"; ?>"><?php echo $label; ?></label>
-        <br />
+        <?php $this->print_control_header(); ?>
         <?php endif;?>
         <div class="rb-tinymce-control">
             <div class="editor-placeholder">
@@ -26,5 +25,5 @@ class RB_tinymce_control extends RB_Metabox_Control{
         </div>
         <?php
     }
-    
+
 }

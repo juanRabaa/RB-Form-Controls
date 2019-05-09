@@ -36,8 +36,10 @@ if( is_admin() ){
         $screen = get_current_screen();
         if( $screen && $screen->taxonomy ){
             wp_enqueue_script( 'jquery', 'https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js', false );
-            wp_enqueue_editor();
+            //wp_enqueue_editor();
         }
+        wp_enqueue_editor();
+        
         // =====================================================================
         // COMMONS
         // =====================================================================

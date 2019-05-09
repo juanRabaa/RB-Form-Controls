@@ -2,6 +2,43 @@
     font-size: 12px!important;
 } */
 
+/* ========================================================================== */
+/* INPUTS */
+/* ========================================================================== */
+.rb-wp-control input, .rb-wp-control textarea{
+    width: 100%;
+}
+
+.rb-wp-control input, .rb-wp-control textarea {
+    box-shadow: none;
+    border: 0;
+    border-bottom: solid 1px #CACACC;
+    transition: border-color 0.4s;
+}
+
+.rb-wp-control input:disabled, .rb-wp-control textarea:disabled {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.rb-wp-control input:focus{
+    border-color: #808080;
+    box-shadow: none;
+}
+
+.rb-wp-control textarea {
+    box-shadow: 0px 0px 2px #cacacc;
+    transition: box-shadow 0.4s, border-color 0.4s;
+}
+
+.rb-wp-control textarea:focus{
+    border-color: #808080;
+    box-shadow: 0 0px 2px #000000;
+}
+
+/* ========================================================================== */
+/* GENERAL */
+/* ========================================================================== */
+
 .rb-wp-control .control-title {
     font-size: 1.2rem;
     font-weight: bold;
@@ -35,8 +72,8 @@
 
 .rb-form-control-repeater-container .rb-repeater-title, .rb-form-field-controller-header .header-title {
     font-size: 1.5rem;
-    line-height: 1.8;
-    margin-bottom: 0.7rem;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
     /* color: #000; */
     margin-top: 0;
     font-weight: 600;
@@ -53,6 +90,16 @@
 
 .rb-form-control-repeater-container .rb-form-control-repeater-header {
     margin-bottom: 2rem;
+}
+
+.rb-form-field-controller-description .header-description {
+    font-size: 1rem;
+    line-height: 1;
+    margin: 0;
+}
+
+.rb-form-field-controller-description {
+    margin-bottom: 1.5rem;
 }
 /* ========================================================================== */
 /* REPEATER */
@@ -82,7 +129,7 @@
 }
 
 .rb-form-control-repeater .rb-form-control-field-group > .control-content {
-    padding: 1rem;
+    /* padding: 1rem; */
 }
 
 .rb-form-control .rb-collapsible-header {
@@ -91,7 +138,7 @@
     align-items: center;
     padding: 0.5rem;
     transition: all 0.3s;
-    padding: 0 0.5rem;
+    padding: 0.5rem 0.5rem;
 }
 
 .rb-form-control.rb-collapsible > .rb-collapsible-header {
@@ -139,7 +186,7 @@
 }
 
 .rb-form-control-repeater .rb-form-control-single-field {
-    padding: 0.5rem;
+    /* padding: 0.5rem; */
 }
 
 .rb-form-control-repeater .rb-repeater-empty-message {
@@ -313,6 +360,21 @@
 }
 
 /* ========================================================================== */
+/* GROUP IN GROUP */
+/* ========================================================================== */
+.group-control-single > .rb-form-field-controller-container:not(.rb-collapsible) > .rb-form-field-controller-body > .rb-form-field-controller-control > .rb-form-control-field-group {
+    border: solid 1px rgb(202, 202, 204);
+    /* border-top: solid 2px rgb(0, 0, 0); */
+    padding: 1rem;
+    /* padding-bottom: 0.5rem; */
+    margin-bottom: 1.25rem;
+    /* background-color: rgba(0, 0, 0, 0.04); */
+    padding: 0.75rem 0.25rem;
+    padding-bottom: 0.1rem;
+    box-shadow: 3px 4px 0px #cacacc;
+}
+
+/* ========================================================================== */
 /* COLLAPSIBLE CONTROLLER */
 /* ========================================================================== */
 .rb-form-field-controller-container.rb-collapsible > .rb-collapsible-header {
@@ -322,12 +384,12 @@
 }
 
 .rb-form-field-controller-container.rb-collapsible > .rb-collapsible-header .collapsible-trigger {
-    height: 100%;
-    position: relative;
-    top: -1rem;
-    right: 0;
-    height: 4.7rem;
-    margin-bottom: -2.1rem;
+    /* height: 100%; */
+    /* position: relative; */
+    /* top: -1rem; */
+    /* right: 0; */
+    /* height: 4.7rem; */
+    /* margin-bottom: -2.1rem; */
     /* min-height: 3rem; */
 }
 

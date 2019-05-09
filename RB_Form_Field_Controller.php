@@ -434,11 +434,11 @@ class RB_Form_Field_Controller{
                 <?php endif; ?>
             </div>
             <div class="rb-form-field-controller-body <?php echo $collapsible_body_class; ?>">
+                <?php if($description): ?>
                 <div class="rb-form-field-controller-description">
-                    <?php if($description): ?>
-                        <p class="header-description"><?php echo esc_html($description); ?></p>
-                    <?php endif; ?>
+                    <p class="header-description"><?php echo esc_html($description); ?></p>
                 </div>
+                <?php endif; ?>
                 <div class="rb-form-field-controller-control">
                 <?php
                     if( !$this->is_repeater() && $this->render_nonce )
