@@ -12,7 +12,10 @@
 abstract class RB_Metabox_Control{
     public $id;
     public $value;
-    public $settings;
+    public $settings = array(
+        'label'         => '',
+        'description'   => '',
+    );
     //Forces the control value to be of a certain type
     public $strict_type;
 

@@ -378,6 +378,8 @@ class RB_Form_Field_Controller{
         'type'          => 'RB_Input_Control',
         'input_type'    => 'text',
         'item_title'    => 'Item',
+        'collapsible'   => false,
+        'repeater'      => false,
     );
 
     public function __construct($id, $value, $options = array()) {
@@ -470,7 +472,7 @@ class RB_Form_Field_Controller{
         //Generates the controler when only one control was provided
         else{
             $control_settings = is_array($this->controls) ? reset($this->controls) : array();//First item in the controls array
-            $control_settings['id'] = $control_id;
+            $control_settings['id'] = $this->id;
             $control_type = $control_settings['type'] ? $control_settings['type'] : 'RB_Input_Control';
             $this->rb_control_field = new RB_Form_Single_Field($this->id, $this->value, $control_settings, $control_type);
         }

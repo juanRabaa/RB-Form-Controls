@@ -25,6 +25,7 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
         'priority'		=> 'default',
         'classes'		=> '',
         'terms'         => array('post_tag'),
+        'column'        => null,
     );
 
     public function __construct($id, $metabox_settings, $control_settings) {
