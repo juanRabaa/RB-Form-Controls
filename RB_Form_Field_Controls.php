@@ -21,7 +21,7 @@ abstract class RB_Metabox_Control{
 
     public function __construct($value, $settings) {
         $this->value = $value;
-        $this->settings = $settings;
+        $this->settings = array_merge($this->settings, $settings);
         $this->id = $settings['id'];
     }
 
@@ -51,7 +51,7 @@ abstract class RB_Metabox_Control{
     }
 
     public function print_label( $for = '' ){
-        $for = $for ? $for : $this->settings['id'];
+        $for = $for ? $for : $this->id;
         $label = $this->settings['label'];
         if($label):
         ?> <label class="control-title" for="<?php echo $for; ?>"><?php echo $label; ?></label> <?php
