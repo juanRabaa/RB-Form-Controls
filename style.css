@@ -5,15 +5,16 @@
 /* ========================================================================== */
 /* INPUTS */
 /* ========================================================================== */
-.rb-wp-control input, .rb-wp-control textarea{
+.rb-wp-control input:not([type="checkbox"]), .rb-wp-control textarea{
     width: 100%;
 }
 
-.rb-wp-control input, .rb-wp-control textarea {
+.rb-wp-control input:not([type="checkbox"]), .rb-wp-control textarea {
     box-shadow: none;
     border: 0;
     border-bottom: solid 1px #CACACC;
     transition: border-color 0.4s;
+    /* background-color: #ffffff57; */
 }
 
 .rb-wp-control input:disabled, .rb-wp-control textarea:disabled {
@@ -362,7 +363,7 @@
 /* ========================================================================== */
 /* GROUP IN GROUP */
 /* ========================================================================== */
-.group-control-single > .rb-form-field-controller-container:not(.rb-collapsible) > .rb-form-field-controller-body > .rb-form-field-controller-control > .rb-form-control-field-group {
+.group-control-single > .rb-form-field-controller-container:not(.rb-collapsible) > .rb-form-field-controller-body > .rb-form-field-controller-control > .rb-form-control-field-group:not(.no-box), .rb-customizer-control .rb-form-control-field-group:not(.no-box):not(.rb-collapsible) {
     border: solid 1px rgb(202, 202, 204);
     /* border-top: solid 2px rgb(0, 0, 0); */
     padding: 1rem;
@@ -371,7 +372,7 @@
     /* background-color: rgba(0, 0, 0, 0.04); */
     padding: 0.75rem 0.25rem;
     padding-bottom: 0.1rem;
-    box-shadow: 3px 4px 0px #cacacc;
+    box-shadow: 3px 4px 4px #cacacc;
 }
 
 /* ========================================================================== */
