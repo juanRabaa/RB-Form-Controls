@@ -22,7 +22,7 @@ class RB_Post_Selector extends RB_Metabox_Control{
             class='$class rb-tax-value'
             rb-control-value
         >";
-        $dropdown .= '<option value=""'.selected($this->value, $post->ID, false).'>'.__( $option_none ).'</option>';
+        $dropdown .= '<option value=""'.selected($this->value, '', false).'>'.__( $option_none ).'</option>';
         $posts = get_posts(array(
             'posts_per_page'       	=> -1,
             'orderby'               => 'title',

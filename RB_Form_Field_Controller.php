@@ -96,7 +96,7 @@ class RB_Form_Group_Field{
         $this->value = $value;
         $this->controls = $controls;
         $this->settings = wp_parse_args($this->settings, $settings);
-        $this->collapsible = $settings['collapsible'] ? $settings['collapsible'] : false;
+        $this->collapsible = isset($settings['collapsible']) && $settings['collapsible'] ? $settings['collapsible'] : false;
     }
 
     public function render(){
@@ -112,32 +112,31 @@ class RB_Form_Group_Field{
             ?>
             <div class="rb-collapsible-body control-content">
                 <?php
-                    if( !$this->collapsible && is_array($action_controls) )
+                    if( !$this->collapsible && isset($action_controls) && is_array($action_controls) )
                         $this->print_action_controls( $action_controls );
                 ?>
                 <div class="controls">
                 <?php
                 foreach($this->controls as $control_ID => $control){
-                    $control_settings = $control;
+                    $def_control_settings = array(
+                        'type'          => 'RB_Input_Control',
+                        'controls'      => null,
+                        'field_class'   => '',
+                    );
+                    $control_settings = array_merge($def_control_settings, $control);
+
                     $control_settings['id'] = $this->get_input_id($control_ID);
                     $control_value = $value_is_set ? $this->value[$control_ID] : '';
-                    $control_type = $control['type'] ? $control['type'] : 'RB_Input_Control';
+                    $control_type = $control_settings['type'];
 
                     if( $control_settings['controls'] ){
                         $field_controller = new RB_Form_Field_Controller($control_settings['id'], $control_value, $control_settings);
                     }
-                    //If the control has been stablished to be a repeater by passing repeater => true or repeater => (array) repeater_settings
-                    // if( $control_settings['repeater'] ){
-                    //     $repeater_settings = is_array($control_settings['repeater']) ? $control_settings['repeater'] : array();
-                    //     $field_controller = new RB_Form_Repeater_Field($control_settings['id'], $control_value, array($control), $items_settings = array(
-                    //         'collapsible'   => true,
-                    //     ), $repeater_settings);
-                    // }
                     else{
                         $field_controller = new RB_Form_Single_Field($control_settings['id'], $control_value, $control_settings, $control_type);
                     }
 
-                    $class = $this->get_setting('field_classes') . ' ' . $control['field_class'];
+                    $class = $this->get_setting('field_classes') . ' ' . $control_settings['field_class'];
                     ?><div class="group-control-single <?php echo $class; ?>" data-id="<?php echo $control_ID; ?>"><?php
                         $field_controller->render();
                     ?></div><?php
@@ -213,6 +212,7 @@ class RB_Form_Repeater_Field{
     public $value = array();
     public $controls = array();
     public $items_settings = array();
+    public $render_nonce = true;
 
     public function __construct($id, $value, $controls, $items_settings = array(), $settings = array()) {
         $this->id = $id;
@@ -281,7 +281,7 @@ class RB_Form_Repeater_Field{
         }
         else{
             $control_settings = reset($this->controls);
-            if( $control_settings['controls'] ){
+            if( isset($control_settings['controls']) && $control_settings['controls'] ){
                 $renderer = new RB_Form_Field_Controller($item_id, $item_value,$control_settings);
             }
             else{
@@ -465,7 +465,7 @@ class RB_Form_Field_Controller{
         //Renders the controls in the controls array
         else if( $this->is_group() ){
             if( is_array($this->settings['controls']) ){
-                $group_settings = is_array($args['group_settings']) ? $args['group_settings'] : array();
+                $group_settings = isset($args['group_settings']) && is_array($args['group_settings']) ? $args['group_settings'] : array();
                 $this->rb_control_field = new RB_Form_Group_Field($this->id, $this->value, $this->settings['controls'], $group_settings);
             }
         }

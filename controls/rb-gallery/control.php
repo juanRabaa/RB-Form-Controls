@@ -4,9 +4,8 @@ class RB_Images_Gallery_Control extends RB_Metabox_Control{
 
     public function __construct($value, $settings) {
          parent::__construct($value, $settings);
-         $this->settings = wp_parse_args( $settings, array(
-             'repeatable'    => true,
-         ) );
+         $this->settings['repeatable']  = true;
+         $this->settings = wp_parse_args( $settings, $this->settings);
     }
 
     public function wp_get_attachment($attachment_id){

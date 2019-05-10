@@ -29,9 +29,9 @@ class RB_Input_Control extends RB_Metabox_Control{
     public function render_content(){
         extract($this->settings);
         $this->value = esc_attr($this->value);
-        $this->choices = $choices;
-        $this->input_type = $input_type;
-        $this->option_none = $option_none;
+        $this->choices = isset($choices) ? $choices : null;
+        $this->input_type = isset($input_type) ? $input_type : null;
+        $this->option_none = isset($option_none) ? $option_none : null;
 
         if( $input_type ):
             if( $label && $this->input_type != 'checkbox' )
@@ -127,12 +127,16 @@ class RB_Input_Control extends RB_Metabox_Control{
     // =========================================================================
     // ATTRIBUTES SET
     // =========================================================================
+    public function get_option($attr_name){
+        return isset($this->settings[$attr_name]) ? $this->settings[$attr_name] : null;
+    }
+
     public function get_input_option($attr_name){
         return $this->settings['input_options'][$attr_name];
     }
 
     public function print_input_attributes(){
-        if(is_array($this->input_options) && is_array($this->settings['input_options'])){
+        if(is_array($this->input_options) && is_array($this->get_option('input_options'))){
             foreach($this->input_options as $attr_name => $attr_value){
                 $user_attr_val = $this->get_input_option($attr_name);
                 $attr_value = isset($user_attr_val) ? esc_attr($user_attr_val) : null;
