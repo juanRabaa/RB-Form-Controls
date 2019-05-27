@@ -1,11 +1,8 @@
 <?php
-class RB_Metabox extends RB_Form_Field_Controller{
+class RB_Attachment_Meta extends RB_Form_Field_Controller{
     public $meta_id;
     public $render_nonce = true;
     public $metabox_settings = array(
-        'admin_page'	=> 'post',
-        'context'		=> 'advanced',
-        'priority'		=> 'default',
         'classes'		=> '',
     );
 
@@ -17,32 +14,42 @@ class RB_Metabox extends RB_Form_Field_Controller{
     }
 
     public function register_metabox(){
-        add_action( 'load-post.php', array($this, 'metabox_setup') );
-        add_action( 'load-post-new.php', array($this, 'metabox_setup') );
+        // add_action( 'load-post.php', array($this, 'metabox_setup') );
+        // add_action( 'load-post-new.php', array($this, 'metabox_setup') );
+        $this->metabox_setup();
     }
 
     public function metabox_setup(){
         /* Add meta boxes on the 'add_meta_boxes' hook. */
-        add_action( 'add_meta_boxes', array($this, 'add_metabox') );
+        add_filter( 'attachment_fields_to_edit', array($this, 'add_metabox'), 10, 2 );
         /* Save post meta on the 'save_post' hook. */
-        add_action( 'save_post', array($this, 'save_metabox'), 10, 2 );
+        add_action( 'edit_attachment', array($this, 'save_metabox'), 20, 2 );
     }
 
     /* Creates the metabox to be displayed on the post editor screen. */
-    public function add_metabox(){
+    public function add_metabox($form_fields, $post){
         extract( $this->metabox_settings );
-        add_meta_box( $this->id, $title, array($this, 'render_metabox'), $admin_page, $context, $priority);
-        $this->add_metabox_classes();
+        $this->value = get_post_meta( $post->ID, $this->meta_id, true );
+
+        $form_fields[$this->id] = array(
+            'label'  => __( $title ),
+            'input'  => 'html',
+            'html'   => $this->get_control_html_as_string($post),
+        );
+        //$this->add_metabox_classes();
+
+        return $form_fields;
     }
 
-    public function render_metabox($post){
-        $value = get_post_meta( $post->ID, $this->meta_id, true );
-        $this->value = $value;
+    public function get_control_html_as_string($post = null){
+        ob_start();
         $this->render($post);
+        $html = ob_get_contents();
+        ob_end_clean();
+        return $html;
     }
 
-    public function save_metabox( $post_id, $post ) {
-
+    public function save_metabox( $post_id ) {
         // /* Verify the nonce before proceeding. */
         // if ( !isset( $_POST[$this->id . '_nonce'] ) || !wp_verify_nonce( $_POST[$this->id . '_nonce'], basename( __FILE__ ) ) )
         //     return $post_id;
@@ -61,22 +68,7 @@ class RB_Metabox extends RB_Form_Field_Controller{
 
         /* Get the meta value of the custom field key. */
         $meta_exists = $this->meta_exists($post_id);
-        $meta_value = get_post_meta( $post_id, $meta_key, true );
-
-        if( $this->id == 'sdfsdfsdfsf' ){
-            //print_r($_POST[$this->id]);
-            echo "<br>";
-            echo $meta_key;
-            echo "<br>";
-            echo 'New meta: ' . $new_meta_value;
-            echo "<br>";echo "<br>";
-            echo 'Old meta: ' . $meta_value;
-            echo "<br>";echo "<br>";
-            echo $new_meta_value && !$meta_value;
-            echo $new_meta_value && $new_meta_value != $meta_value;
-            echo (!$new_meta_value || empty($new_meta_value)) && $meta_value;
-            err();
-        }
+        $old_meta_value = get_post_meta( $post_id, $meta_key, true );
 
         // If the new value is not null
         if( isset($new_meta_value) ){
@@ -84,13 +76,12 @@ class RB_Metabox extends RB_Form_Field_Controller{
             if( !$meta_exists )
                 add_post_meta( $post_id, $meta_key, $new_meta_value, true );
             /* If the new meta value does not match the old value, update it. */
-            else if( $new_meta_value != $meta_value )
+            else if( $new_meta_value != $old_meta_value )
                 update_post_meta( $post_id, $meta_key, $new_meta_value );
         }
         /* If there is no new meta value but an old value exists, delete it. */
         else if ( $meta_exists )
-            delete_post_meta( $post_id, $meta_key, $meta_value );
-
+            delete_post_meta( $post_id, $meta_key, $old_meta_value );
     }
 
     public function add_metabox_classes(){

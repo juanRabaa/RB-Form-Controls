@@ -25,14 +25,14 @@ class RB_Form_Single_Field{
         $this->generate_renderer();
     }
 
-    public function render(){
+    public function render($post = null){
         if( $this->renderer ){
             ?>
             <div class="rb-form-control-single-field rb-form-control">
                 <div class="rb-collapsible-body control-content">
                 <?php
                 $this->print_action_controls();
-                $this->renderer->print_control();
+                $this->renderer->print_control($post);
                 ?>
                 </div>
             </div>
@@ -99,7 +99,7 @@ class RB_Form_Group_Field{
         $this->collapsible = isset($settings['collapsible']) && $settings['collapsible'] ? $settings['collapsible'] : false;
     }
 
-    public function render(){
+    public function render($post = null){
         $collapsible_class = $this->collapsible ? 'rb-collapsible' : '';
         $value_is_set = is_array($this->value) && !empty($this->value);
 
@@ -138,7 +138,7 @@ class RB_Form_Group_Field{
 
                     $class = $this->get_setting('field_classes') . ' ' . $control_settings['field_class'];
                     ?><div class="group-control-single <?php echo $class; ?>" data-id="<?php echo $control_ID; ?>"><?php
-                        $field_controller->render();
+                        $field_controller->render($post);
                     ?></div><?php
                 }
                 ?>
@@ -222,13 +222,13 @@ class RB_Form_Repeater_Field{
         $this->settings = wp_parse_args($this->settings, $settings);
     }
 
-    public function render(){
+    public function render($post = null){
         ?>
         <div class="rb-form-control-repeater-container">
             <div class="rb-form-control-repeater" data-id="<?php echo $this->id; ?>" data-type="<?php echo $this->get_repeater_type(); ?>" <?php echo $this->get_dinamic_title_attr(); ?>
             <?php echo $this->get_base_title_attr(); ?>>
                 <div class="empty-control">
-                    <?php $this->print_item('(__COUNTER_PLACEHOLDER)', ''); ?>
+                    <?php $this->print_item('(__COUNTER_PLACEHOLDER)', '', $post); ?>
                 </div>
                 <!-- REPEATER VALUE -->
                 <input type="hidden" rb-control-repeater-value name="<?php echo $this->id; ?>" value="<?php echo esc_attr(json_encode($this->value, JSON_UNESCAPED_UNICODE)); ?>"></input>
@@ -240,14 +240,14 @@ class RB_Form_Repeater_Field{
                 $this->item_index = 1;
                 if(is_array($this->value)){
                     foreach($this->value as $value){
-                        $this->print_item($this->item_index, $value);
+                        $this->print_item($this->item_index, $value, $post);
                         $this->item_index++;
                     }
                 }
                 //There is not a value to work on
                 else{
                     //prints an empty first item
-                    $this->print_item('1', '');
+                    $this->print_item('1', '', $post);
                 }
                 ?>
                 </div>
@@ -262,13 +262,13 @@ class RB_Form_Repeater_Field{
         <?php
     }
 
-    public function get_item_as_string($item_index, $item_value){
+    public function get_item_as_string($item_index, $item_value, $post = null){
         ob_start();
-        $this->print_item($item_index, $item_value);
+        $this->print_item($item_index, $item_value, $post);
         return ob_get_clean();
     }
 
-    public function print_item($item_index, $item_value){
+    public function print_item($item_index, $item_value, $post = null){
         $renderer = null;
         $item_id = $this->id  . '__' . $item_index;
 
@@ -295,7 +295,7 @@ class RB_Form_Repeater_Field{
         }
 
         if($renderer)
-            $renderer->render();
+            $renderer->render($post);
     }
     // =========================================================================
     // ATTRIBUTES
@@ -415,7 +415,7 @@ class RB_Form_Field_Controller{
     // =========================================================================
 
     //Renders the controller accordingly to the settings passed
-    public function render(){
+    public function render($post = null){
         $this->generate_control();
         $title = $this->get_setting('title');
         $description = $this->get_setting('description');
@@ -446,7 +446,7 @@ class RB_Form_Field_Controller{
                     if( !$this->is_repeater() && $this->render_nonce )
                         wp_nonce_field( basename( __FILE__ ), $this->id . '_nonce' );
 
-                    $this->rb_control_field->render();
+                    $this->rb_control_field->render($post);
                 ?>
                 </div>
             </div>
@@ -473,7 +473,7 @@ class RB_Form_Field_Controller{
         else{
             $control_settings = is_array($this->controls) ? reset($this->controls) : array();//First item in the controls array
             $control_settings['id'] = $this->id;
-            $control_type = $control_settings['type'] ? $control_settings['type'] : 'RB_Input_Control';
+            $control_type = isset($control_settings['type']) && $control_settings['type'] ? $control_settings['type'] : 'RB_Input_Control';
             $this->rb_control_field = new RB_Form_Single_Field($this->id, $this->value, $control_settings, $control_type);
         }
     }
@@ -499,15 +499,10 @@ class RB_Form_Field_Controller{
         //If a single input control was used
         else{
             /* Get the posted data */
-            if($this->rb_control_field->renderer->strict_type == 'bool')
+            if(isset($this->rb_control_field) && $this->rb_control_field->renderer->strict_type == 'bool')
                 $sanitized_value = $isset_value ? true : false;
             else
                 $sanitized_value = $isset_value ? $value : null;
-            // if($this->id == 'gg_prod_cat_show_title'){
-            //     var_dump($this->rb_control_field);
-            //     var_dump($sanitized_value);
-            //     eerrere();
-            // }
         }
 
         return $sanitized_value;

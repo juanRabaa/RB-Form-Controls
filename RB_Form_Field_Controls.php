@@ -26,8 +26,8 @@ abstract class RB_Metabox_Control{
     }
 
     //Wraps the content of the control and renders it.
-    public function print_control(){
-        ?><div class="rb-wp-control"><?php $this->render_content(); ?></div><?php
+    public function print_control($post = null){
+        ?><div class="rb-wp-control"><?php $this->render_content($post); ?></div><?php
     }
 
     //The method that renders the control. Should be overriden by the children

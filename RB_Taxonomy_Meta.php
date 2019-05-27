@@ -75,7 +75,7 @@ class RB_Taxonomy_Form_Field extends RB_Form_Field_Controller{
         $this->update_value($term_obj);
         ?>
         <div class="rb-tax-field">
-            <?php $this->render(); ?>
+            <?php $this->render($term_obj); ?>
         </div>
         <?php
     }

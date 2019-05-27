@@ -6,7 +6,7 @@ class RB_Input_Control extends RB_Metabox_Control{
     public $value;
     public $input_type;
     public $choices;
-    public $input_options = array(
+    public $default_input_options = array(
         'max'           => null,
         'min'           => null,
         'readonly'      => null,
@@ -79,7 +79,7 @@ class RB_Input_Control extends RB_Metabox_Control{
     public function render_textarea_input(){
         $name = esc_attr($this->id);
         $value = esc_attr($this->value);
-        ?><textarea type="textarea" name="<?php echo $name; ?>" value="<?php echo $value; ?>" <?php $this->print_input_attributes(); ?> rb-control-value></textarea><?php
+        ?><textarea type="textarea" name="<?php echo $name; ?>" value="<?php echo $value; ?>" <?php $this->print_input_attributes(); ?> rb-control-value><?php echo $value; ?></textarea><?php
     }
 
     public function render_checkbox_input(){
@@ -88,7 +88,7 @@ class RB_Input_Control extends RB_Metabox_Control{
         ?>
         <label>
             <input type="hidden" rb-control-value name="<?php echo $this->id; ?>" value="<?php echo $this->value; ?>">
-            <input type="checkbox" <?php echo $checked_attr; ?> <?php $this->print_input_attributes(); ?> onclick="this.previousElementSibling.value=1-this.previousElementSibling.value">
+            <input type="checkbox" <?php echo $checked_attr; ?> <?php $this->print_input_attributes(); ?> onclick="this.previousElementSibling.value=1-this.previousElementSibling.value; $(this.previousElementSibling).trigger('input');">
             <span><?php echo $this->settings['label']; ?></span>
         </label>
         <?php
@@ -132,14 +132,14 @@ class RB_Input_Control extends RB_Metabox_Control{
     }
 
     public function get_input_option($attr_name){
-        return $this->settings['input_options'][$attr_name];
+        return isset($this->settings['input_options']) && isset($this->settings['input_options'][$attr_name]) ? $this->settings['input_options'][$attr_name] : null;
     }
 
     public function print_input_attributes(){
-        if(is_array($this->input_options) && is_array($this->get_option('input_options'))){
-            foreach($this->input_options as $attr_name => $attr_value){
+        if(is_array($this->default_input_options) && isset($this->settings['input_options']) && is_array($this->settings['input_options'])){
+            foreach($this->default_input_options as $attr_name => $default_attr_value){
                 $user_attr_val = $this->get_input_option($attr_name);
-                $attr_value = isset($user_attr_val) ? esc_attr($user_attr_val) : null;
+                $attr_value = isset($user_attr_val) ? esc_attr($user_attr_val) : $default_attr_value;
                 if(isset($attr_value))
                     echo "$attr_name='$user_attr_val' ";
             }

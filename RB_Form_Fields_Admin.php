@@ -39,7 +39,7 @@ if( is_admin() ){
             //wp_enqueue_editor();
         }
         wp_enqueue_editor();
-        
+
         // =====================================================================
         // COMMONS
         // =====================================================================
@@ -48,7 +48,7 @@ if( is_admin() ){
         wp_enqueue_style( 'rb-collapsible', plugin_dir_url(__FILE__) . 'css/rb-collapsible.css' );
         wp_enqueue_script( 'rb-collapsible', plugin_dir_url(__FILE__) . 'js/rb-collapsible.js', array('jquery'), true );
         //Sortabe jQuery UI
-        wp_enqueue_script( 'jquery-ui-sortable', plugin_dir_url(__FILE__) . 'js/libs/jquery-ui-1.12.1.custom', array('jquery'), true );
+        wp_enqueue_script( 'jquery-ui', plugin_dir_url(__FILE__) . 'js/libs/jquery-ui/jquery-ui.min.js', array('jquery'), true );
         //Main
         wp_enqueue_style( 'rb-form-fields-css', plugin_dir_url(__FILE__) . 'style.css' );
         wp_enqueue_script( 'rb-controls-values-manager', plugin_dir_url(__FILE__) . 'js/rb-controls.js', array('jquery'), true );
@@ -71,7 +71,7 @@ if( is_admin() ){
     rb_require_all_controls();
     require_once plugin_dir_path(__FILE__) . '/RB_Metabox.php';
     require_once plugin_dir_path(__FILE__) . '/RB_Taxonomy_Meta.php';
-
+    require_once plugin_dir_path(__FILE__) . '/RB_Attachment_Meta.php';
 }
 
 // =============================================================================
